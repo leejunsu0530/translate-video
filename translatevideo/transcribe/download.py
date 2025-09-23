@@ -14,7 +14,7 @@ def pwcpp_openvino_update(binary_path: str | Path, print_: Callable = print) -> 
 
     env = os.environ.copy()
     env["WHISPER_OPENVINO"] = "1"
-    cmd = f"echo WHISPER_OPENVINO && call {setupvars_path} && {sys.executable} -m pip install git+https://github.com/absadiki/pywhispercpp --no-cache --force-reinstall"
+    cmd = f"echo $env:WHISPER_OPENVINO && call {setupvars_path} && {sys.executable} -m pip install git+https://github.com/absadiki/pywhispercpp --no-cache --force-reinstall"
     print_(f"Running command: {cmd}")
     proc = subprocess.Popen(
         cmd,
