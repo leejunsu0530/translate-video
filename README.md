@@ -1,7 +1,7 @@
 # translate-video 
 video and audio translation
-
-##features
+https://leejunsu0530.github.io/translate-video/
+## features
 1. whisper.cpp based audio transcription
      - Speaker Diarization
      - BGM Separation
