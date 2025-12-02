@@ -12,14 +12,40 @@
 ## Installation
 > **Note**: 현재 개발은 **Windows**와 **Intel GPU** 사용 환경을 중점적으로 진행하고 있으며, 추후 cuda도 지원할 예정임.
 
-1. Dependency library
+1. Installing Dependency Library
 
    다른 종속성은 라이브러리에서 자동으로 설치하지만 paddlepaddle, torch, pywhispercpp는 최상의 결과를 위해서는 수동 설치가 필요하다.
 
-   <details>
-       <summary>paddlepaddle 설치</summary>
-       [공식 사이트 설치 가이드] (https://www.paddlepaddle.org.cn/en/install/quick?docurl=/documentation/docs/en/develop/install/pip/windows-pip_en.html)
-       에서 자신의 환경에 맞게 설정하면 설치 명령어가 아래와 같이 나온다.
-       
-       python -m pip install paddlepaddle==3.2.2 -i https://www.paddlepaddle.org.cn/packages/stable/cpu/
+   <details open>
+      <summary><b>paddlepaddle 설치</b></summary>
+      
+      [공식 사이트 설치 가이드](https://www.paddlepaddle.org.cn/en/install/quick?docurl=/documentation/docs/en/develop/install/pip/windows-pip_en.html)
+   에서 자신의 환경에 맞게 설정하면 설치 명령어가 아래와 같이 나온다.
+
+   ```powershell
+      python -m pip install paddlepaddle==3.2.2 -i https://www.paddlepaddle.org.cn/packages/stable/cpu/
+   ```    
    </details>
+
+   <details open>
+      <summary><b>torch 설치</b></summary>
+      Intel GPU를 사용할 경우에, 아래 명령어를 사용하면 된다.
+      
+      ```powershell
+      python -m pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/xpu
+      ```
+   </details>
+
+   <details open>
+      <summary><b>pywhispercpp</b></summary>
+      > 설치과정이 복잡하여 휠로 미리 빌드해둘지 고려중
+   </details>
+   
+
+2. Installing 'translate-video'
+
+
+## Usage
+```python
+pass
+```
