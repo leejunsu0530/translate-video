@@ -1,30 +1,50 @@
-print("실행1")
-
-from transformers import(
+from transformers import (
     EncoderDecoderModel,
-    PreTrainedTokenizerFast,
-    BertJapaneseTokenizer
+    BertJapaneseTokenizer,
+    GPT2TokenizerFast
 )
 
-# import torch
-print("아니왜노트북에선메모리가터져")
+import torch
 
 
-encoder_model_name = "cl-tohoku/bert-base-japanese-v2"
-decoder_model_name = "skt/kogpt2-base-v2"
+class AIHubTranslator:
+    def __init__(self, max_length: int = 500) -> None:
+        encoder_model_name = "cl-tohoku/bert-base-japanese-v2"
+        decoder_model_name = "skt/kogpt2-base-v2"
+        model_name = "sappho192/aihub-ja-ko-translator"
 
-src_tokenizer = BertJapaneseTokenizer.from_pretrained(encoder_model_name)
-trg_tokenizer = PreTrainedTokenizerFast.from_pretrained(decoder_model_name)
+        self.max_length = max_length
 
-model = EncoderDecoderModel.from_pretrained("sappho192/aihub-ja-ko-translator")
+        self.src_tokenizer = BertJapaneseTokenizer.from_pretrained(
+            encoder_model_name)  # 이거 타입힌트 필요
+        self.trg_tokenizer = GPT2TokenizerFast.from_pretrained(
+            decoder_model_name)
+        self.model = EncoderDecoderModel.from_pretrained(model_name)
 
-text = "初めまして。よろしくお願いします。"
+        self.device = torch.device(
+            "cuda" if torch.cuda.is_available() else "cpu")
+        self.model.to(self.device)
+        self.model.eval()  # 추론 모드로 변경(훈련용 동작 끔)
 
-def translate(text_src):
-    embeddings = src_tokenizer(text_src, return_attention_mask=False, return_token_type_ids=False, return_tensors='pt')
-    embeddings = {k: v for k, v in embeddings.items()}
-    output = model.generate(**embeddings, max_length=500)[0, 1:-1]
-    text_trg = trg_tokenizer.decode(output.cpu())
-    return text_trg
+    def translate(self, texts: list[str]) -> list[str]:
+        embeddings = self.src_tokenizer(
+            texts,
+            padding=True,
+            truncation=True,
+            return_attention_mask=True,
+            return_token_type_ids=True,
+            return_tensors='pt'
+        )
+        embeddings = {k: v.to(self.device) for k, v in embeddings.items()}
 
-print(translate(text))
+        with torch.no_grad():
+            outputs = self.model.generate(
+                **embeddings,
+                max_length=self.max_length,
+                num_beams=1,
+                do_sample=False  # 이 옵션들이 뭔지 모르겠음. 설명 필요
+            )
+            # text_trg = trg_tokenizer.decode(output.cpu()) # 여긴 output을 cpu로 올렸는데 이거 안함?
+        result_texts = self.trg_tokenizer.batch_decode
+        # 여기는 첫번째 질문까지임. 추가적인 작업 및 테스트 필요
+        return texts
