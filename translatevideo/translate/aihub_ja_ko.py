@@ -3,7 +3,7 @@ from transformers import (
     BertJapaneseTokenizer,
     GPT2TokenizerFast
 )
-
+from .translate import Tr
 import torch
 
 
