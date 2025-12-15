@@ -1,3 +1,0 @@
-pip install optimum[openvino] transformers
-# pip install torch torchvision torchaudio -U --index-url https://download.pytorch.org/whl/xpu
-pip install torch -U --index-url https://download.pytorch.org/whl/xpu

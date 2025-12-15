@@ -1,9 +1,11 @@
 from transformers import (
     EncoderDecoderModel,
     BertJapaneseTokenizer,
-    GPT2TokenizerFast
+    GPT2TokenizerFast,
+    PreTrainedTokenizer,
+
 )
-from .translate import Tr
+from .translate import Translator
 import torch
 
 

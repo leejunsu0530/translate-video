@@ -1,12 +1,8 @@
-# python -m pip install -r requirements.txt --index-url "내 저장소" --extra-index-url "https://pypi.org/simple"
-
-pywhispercpp
+# py -3.11 -m venv .venv && .venv/scripts/activate && pip install -r requirements.txt 
+# pywhispercpp
 yt-dlp
 whisperx
-paddlepaddle
+
+# paddlepaddle
 # https://www.paddlepaddle.org.cn/packages/stable/cpu/paddlepaddle/
-# paddlepaddle-3.2.2-cp39-cp39-win_amd64.whl
-# paddlepaddle-3.2.2-cp311-cp311-win_amd64.whl
-# paddlepaddle-3.2.2-cp312-cp312-win_amd64.whl
-# paddlepaddle-3.2.2-cp313-cp313-win_amd64.whl
-paddleocr
+# paddleocr
