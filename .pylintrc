@@ -1,2 +1,5 @@
 [TYPECHECK]
 extension-pkg-allow-list=whisperx
+
+[MAIN]
+ignore-patterns=.*\.pyi$
