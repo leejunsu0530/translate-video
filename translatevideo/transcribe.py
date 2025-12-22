@@ -1,3 +1,11 @@
+"""
+TODO:
+- ~init에서 model_a, metadata 튜플로 묶어서 처리, 언어코드 없을 경우만 객체 다시 생성~
+    - 이 부분은 불러오기 함수가 그다지 무거워보이지 않아서 상관x. 언어 코드 강제 지정만 추가?
+- SRT 저장 기능 구현
+- 불러오기 함수에 모델 이름 지정 기능 등 있는데 그거 활용할 수 있게 하기
+- 나중에 다중상속 고려한 설계
+"""
 import whisperx  # type: ignore
 import gc
 import torch
@@ -109,11 +117,13 @@ class WhisperXTranscriber:
 
         return aligned_result
 
-     def make_srt(self, output_path: str | Path=Path().cwd()) -> Path:
+    def make_srt(self, output_path: str | Path = Path().cwd()) -> Path:
         """
         Save the aligned segments as an SRT file.
         """
         if self.aligned_segments is None:
-            raise ValueError("No aligned segments available. Please run transcribe() first.")
+            raise ValueError(
+                "No aligned segments available. Please run transcribe() first.")
 
-        pass # whisperx 자체도 서브타이틀 제작기능이 있는데 이거 쓸까?
+        return None
+        # whisperx 자체도 서브타이틀 제작기능이 있는데 이거 쓸까?
