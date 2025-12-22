@@ -109,7 +109,7 @@ class WhisperXTranscriber:
 
         return aligned_result
 
-     def make_srt(self, output_path: str | Path=Path().cwd()) -> Path:
+     def make_srt(self, output_path: str | Path=Path.cwd()) -> Path:
         """
         Save the aligned segments as an SRT file.
         """
