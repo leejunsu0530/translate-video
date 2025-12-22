@@ -55,12 +55,10 @@ class WhisperXTranscriber:
         Some part of this code is adapted from github of whisperx
 
         Args:
-            - whisper_model_name: Size of the model to use (**tiny, tiny.en, base, base.en,
-            small, small.en, distil-small.en, medium, medium.en, distil-medium.en, large-v1,
-            large-v2, large-v3, large, distil-large-v2, distil-large-v3, large-v3-turbo,** or **turbo**)
-            - batch_size: reduce if low on GPU mem
-            - compute_type: change to "int8" if low on GPU mem (may reduce accuracy)
-            - print_results: Optional function to print results (for logging). 
+            whisper_model_name: Size of the model to use (tiny, tiny.en, base, base.en, small, small.en, distil-small.en, medium, medium.en, distil-medium.en, large-v1,large-v2, large-v3, large, distil-large-v2, distil-large-v3, large-v3-turbo, or turbo)
+            batch_size: reduce if low on GPU mem
+            compute_type: change to "int8" if low on GPU mem (may reduce accuracy)
+            print_results: Optional function to print results (for logging). 
             """
         self.device = device
         self.model: FasterWhisperPipeline = whisperx.load_model(
@@ -73,7 +71,7 @@ class WhisperXTranscriber:
         Because whisperx itself preprocesses audio file, we just need to give any type of audio file.
         """
         audio: np.ndarray = whisperx.load_audio(str(audio_file))
-        result: TranscriptionResult = self.model.transcribe(
+        result = self.model.transcribe(
             audio, batch_size=self.batch_size)
         if self.print_results is not None:
             self.print_results(result["segments"])  # before alignment

@@ -52,19 +52,22 @@ def load_model(whisper_arch: str,
                local_files_only: bool = ...,
                threads: int = ...,
                ) -> FasterWhisperPipeline:
-    """Load a Whisper model for inference.
+    """
+    Load a Whisper model for inference.
+
     Args:
-        whisper_arch - The name of the Whisper model to load.
-        device - The device to load the model on.
-        compute_type - The compute type to use for the model.
-        vad_model - The vad model to manually assign.
-        vad_method - The vad method to use. vad_model has a higher priority if it is not None.
-        options - A dictionary of options to use for the model.
-        language - The language of the model. (use English for now)
-        model - The WhisperModel instance to use.
-        download_root - The root directory to download the model to.
-        local_files_only - If `True`, avoid downloading the file and return the path to the local cached file if it exists.
-        threads - The number of cpu threads to use per worker, e.g. will be multiplied by num workers.
+        whisper_arch: The name of the Whisper model to load.
+        device: The device to load the model on.
+        compute_type: The compute type to use for the model.
+        vad_model: The vad model to manually assign.
+        vad_method: The vad method to use. vad_model has a higher priority if it is not None.
+        options: A dictionary of options to use for the model.
+        language: The language of the model. (use English for now)
+        model: The WhisperModel instance to use.
+        download_root: The root directory to download the model to.
+        local_files_only: If `True`, avoid downloading the file and return the path to the local cached file if it exists.
+        threads: The number of cpu threads to use per worker, e.g. will be multiplied by num workers.
+    
     Returns:
         A Whisper pipeline.
     """
