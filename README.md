@@ -4,7 +4,7 @@
 
 ## features
 
-1. whisper.cpp와 whisperX 기반 오디오 전사
+1. [WhisperX](https://github.com/m-bain/whisperX) 기반 오디오 전사
 2. PaddleOCR을 통한 비디오 텍스트 검출 및 인식
 3. HuggingFace Hub를 통한 다국어 텍스트 번역
 4. 생성, 번역 결과를 원본 비디오의 글자를 impaint하고 삽입하거나, ass 형식의 자막 파일로 생성
