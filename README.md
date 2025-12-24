@@ -35,11 +35,6 @@
       python -m pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/xpu
       ```
    </details>
-
-   <details open>
-      <summary><b>pywhispercpp</b></summary>
-      > 설치과정이 복잡하여 휠로 미리 빌드해둘지 고려중
-   </details>
    
 
 2. Installing 'translate-video'
