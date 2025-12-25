@@ -1,0 +1,1 @@
+from translatevideo import WhisperXTranscriber
