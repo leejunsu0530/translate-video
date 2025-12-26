@@ -5,10 +5,7 @@ setup(
     name="translate-video",            # Package name
     version=__version__,             # Version number
     packages=find_packages(),    # Automatically find subpackages
-    install_requires=[           # Dependencies
-        "git+https://github.com/absadiki/pywhispercpp",
-
-    ],
+    install_requires=["whisperx", "transformers"],
     author="leejunsu0530",
     author_email="leejunsu0530@gmail.com",
     description="translate video images and audio",
