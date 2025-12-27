@@ -41,6 +41,5 @@
 
 
 ## Usage
-```python
-pass
-```
+### python
+### GUI(Gradio)
