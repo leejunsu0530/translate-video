@@ -1,0 +1,44 @@
+THIRD-PARTY SOFTWARE LICENSE NOTICES
+
+This project includes or depends on the following third-party libraries.
+These libraries are distributed under their respective licenses.
+
+------------------------------------------------------------
+paddleocr
+------------------------------------------------------------
+License: Apache License 2.0
+Copyright © PaddlePaddle Authors
+
+Source: https://github.com/PaddlePaddle/PaddleOCR
+
+------------------------------------------------------------
+transformers
+------------------------------------------------------------
+License: Apache License 2.0
+Copyright © Hugging Face, Inc.
+
+Source: https://github.com/huggingface/transformers
+
+------------------------------------------------------------
+whisperx
+------------------------------------------------------------
+License: BSD 4-Clause License
+
+Copyright © 2022-present, whisperx contributors
+
+Source: https://github.com/m-bain/whisperX
+
+------------------------------------------------------------
+opencv-python
+------------------------------------------------------------
+License: Apache License 2.0
+
+Copyright © OpenCV Team
+
+Source: https://github.com/opencv/opencv-python
+
+------------------------------------------------------------
+
+All third-party libraries listed above are used in accordance with
+their respective licenses. This project does not include or redistribute
+the source code of these libraries unless otherwise stated.

@@ -5,18 +5,31 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "translate-video"
 version = "0.1.0"
-description = "translate video images and audio"
-readme = "README.md"
-requires-python = ">=3.11"
-
 authors = [
     { name = "leejunsu0530", email = "leejunsu0530@gmail.com" }
 ]
-
+description = "translate video images and audio"
+readme = "README.md"
+requires-python = ">=3.11,<3.14" # paddlepaddle 때문에 13으로 제한. 3.12 이하면 <3.13이라 적어야 3.12.1 등을 포함함
+keywords = ["translate", "translation", "whisper", "whisperx", "ocr", "video", "audio", "subtitle"]
+license = { file = "LICENSE" }
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: MIT License"
+]
 dependencies = [
     "whisperx",
     "transformers"
 ]
+
+[project.optional-dependencies]
+gui = [
+    "gradio"
+]
+# dev = []
+
+[project.scripts]
+tr-video = "translatevideo.__main__:main" # 모듈경로:함수이름 구조
 
 [project.urls]
 Homepage = "https://github.com/leejunsu0530/translate-video"

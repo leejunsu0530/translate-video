@@ -1,4 +1,5 @@
 """
+part of the code is adapted from example code of whisperx
 TODO:
 - ~init에서 model_a, metadata 튜플로 묶어서 처리, 언어코드 없을 경우만 객체 다시 생성~
     - 이 부분은 불러오기 함수가 그다지 무거워보이지 않아서 상관x. 언어 코드 강제 지정만 추가?
