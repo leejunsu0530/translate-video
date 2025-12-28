@@ -9,7 +9,7 @@ from pathlib import Path
 
 # 경로 설정
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
-VENV_DIR = PROJECT_ROOT / ".licenses_venv"
+VENV_DIR = PROJECT_ROOT / "devescripts" /".licenses_venv"
 VENV_PYTHON = VENV_DIR / "Scripts" / "python.exe"
 VENV_PIP = VENV_DIR / "Scripts" / "pip.exe"
 
