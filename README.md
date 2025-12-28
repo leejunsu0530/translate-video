@@ -102,7 +102,8 @@
 - [ ] 구글, deepl, marianMT, NLLB, MBart 등 다양한 번역기 지원
 - [ ] cuda 지원
 - [ ] pypi 지원
-- [ ] Gradio 기반 GUI 지원 
+- [ ] Gradio 기반 GUI 지원
+- [ ] faster-whisper, insanely-faster-whisper, whisper.cpp 추가 지원
 
 ## License
 이 프로젝트는 MIT 라이선스 하에 보호받고 있습니다. 자세한 정보는 LICENSE 파일을 참조하세요.
