@@ -2,22 +2,25 @@
 
 오디오를 전사하고, 이미지와 오디오의 텍스트를 번역하여 ass 자막파일로 만들거나 영상에 삽입하는 파이썬 라이브러리
 
+<!--여기 toc와 작동가능 환경 등 표시하는 스크립트 만들기-->
+<!--i18n으로 자동번역 추가-->
 ## features
 
 1. [WhisperX](https://github.com/m-bain/whisperX) 기반 오디오 전사
-2. PaddleOCR을 통한 비디오 텍스트 검출 및 인식
-3. HuggingFace Hub를 통한 다국어 텍스트 번역
-4. 생성, 번역 결과를 원본 비디오의 글자를 impaint하고 삽입하거나, ass 형식의 자막 파일로 생성
+2. [PaddleOCR](https://github.com/PaddlePaddle/PaddleOCR)을 통한 비디오 텍스트 검출 및 인식
+3. HuggingFace Hub 및 api 기반 번역기를 통한 다국어 텍스트 번역
+4. 생성, 번역 결과를 원본 비디오의 글자를 impaint하고 삽입하거나, .ass 형식의 자막 파일로 생성
 
 ## Installation
 > **Note**: 현재 개발은 **Windows**와 **Intel GPU** 사용 환경을 중점적으로 진행하고 있으며, 추후 cuda도 지원할 예정임.
 
-1. Outer Dependencies
+1. External Dependencies
 
    yt-dlp를 위해서 FFmpeg, FFprove, Deno를 설치해야 한다.
    
    <details open>
       <summary><b>FFmpeg & FFprove 설치</b></summary>
+      
       FFprove는 FFmpeg를 설치하면 같이 설치된다.
       Windows에서는 아래의 명령어로 설치할 수 있다.
 
@@ -28,6 +31,7 @@
       # on Windows using Scoop (https://scoop.sh/)
       scoop install ffmpeg
       ```
+      
       위의 명령어에 실패하면 수동 설치를 할 수도 있다.
       [Windows builds from gyan.dev](https://www.gyan.dev/ffmpeg/builds/) 또는 [Windows builds by BtbN](https://github.com/BtbN/FFmpeg-Builds/releases)에 들어가서 압축 파일을 다운받아 원하는 폴더에 압축 해제하고 해당 폴더 내 bin 폴더를 시스템 환경변수의 Path에 설정하면 된다.
 
@@ -36,6 +40,7 @@
 
    <details open>
       <summary><b>Deno 설치</b></summary>
+      
       Deno는 yt-dlp의 JS 관련 의존성인 [yt-dlp-ejs](https://github.com/yt-dlp/ejs)의 의존성으로, 링크에서 알 수 있듯이 Node, Bun, QuickJS로 대체 가능하지만 Deno가 추천된다.
 
       https://docs.deno.com/runtime/getting_started/installation/ 에서 설치 방법을 알 수 있다. Windows의 경우에는 아래 명령어로 설치한다.
@@ -71,6 +76,7 @@
 
    <details open>
       <summary><b>torch 설치</b></summary>
+      
       자신에게 맞는 index url을 지정해서 설치하면 된다. 예를 들어, Intel GPU를 사용할 경우에는 아래 명령어를 사용하면 된다.
       
       ```powershell
@@ -82,6 +88,7 @@
 3. Installing translate-video
    
    추후 pypi에서도 지원할 예정
+   
    ```powershell
    python -m pip install git+https://github.com/leejunsu0530/translate-video
    ```
@@ -91,6 +98,12 @@
 ### GUI(Gradio)
 
 ## TODO
+- [ ] paddleocr 기반 이미지/영상 자막 생성 지원
+- [ ] 구글, deepl, marianMT, NLLB, MBart 등 다양한 번역기 지원
+- [ ] cuda 지원
+- [ ] pypi 지원
+- [ ] Gradio 기반 GUI 지원
+- [ ] faster-whisper, insanely-faster-whisper, whisper.cpp 추가 지원
 
 ## License
 이 프로젝트는 MIT 라이선스 하에 보호받고 있습니다. 자세한 정보는 LICENSE 파일을 참조하세요.
