@@ -17,9 +17,13 @@ classifiers = [
     "Programming Language :: Python :: 3",
     "License :: OSI Approved :: MIT License"
 ]
-dependencies = [
+dependencies = [ # paddlepaddle, torch는 별도 설치
     "whisperx",
-    "transformers"
+    # "transformers",
+    # "opencv-python",
+    # "paddleocr",
+    # "yt-dlp[default,curl-cffi]",
+    
 ]
 
 [project.optional-dependencies]
