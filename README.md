@@ -12,7 +12,7 @@
 ## Installation
 > **Note**: 현재 개발은 **Windows**와 **Intel GPU** 사용 환경을 중점적으로 진행하고 있으며, 추후 cuda도 지원할 예정임.
 
-1. Outer Dependencies
+1. External Dependencies
 
    yt-dlp를 위해서 FFmpeg, FFprove, Deno를 설치해야 한다.
    
