@@ -2,12 +2,14 @@
 
 오디오를 전사하고, 이미지와 오디오의 텍스트를 번역하여 ass 자막파일로 만들거나 영상에 삽입하는 파이썬 라이브러리
 
+<!--여기 toc와 작동가능 환경 등 표시하는 스크립트 만들기-->
+<!--i18n으로 자동번역 추가-->
 ## features
 
 1. [WhisperX](https://github.com/m-bain/whisperX) 기반 오디오 전사
-2. PaddleOCR을 통한 비디오 텍스트 검출 및 인식
-3. HuggingFace Hub를 통한 다국어 텍스트 번역
-4. 생성, 번역 결과를 원본 비디오의 글자를 impaint하고 삽입하거나, ass 형식의 자막 파일로 생성
+2. [PaddleOCR](https://github.com/PaddlePaddle/PaddleOCR)을 통한 비디오 텍스트 검출 및 인식
+3. HuggingFace Hub 및 api 기반 번역기를 통한 다국어 텍스트 번역
+4. 생성, 번역 결과를 원본 비디오의 글자를 impaint하고 삽입하거나, .ass 형식의 자막 파일로 생성
 
 ## Installation
 > **Note**: 현재 개발은 **Windows**와 **Intel GPU** 사용 환경을 중점적으로 진행하고 있으며, 추후 cuda도 지원할 예정임.
@@ -96,11 +98,11 @@
 ### GUI(Gradio)
 
 ## TODO
-- [] paddleocr 기반 이미지/영상 자막 생성 지원
-- [] 구글, deepl, marianMT, NLLB, MBart 등 다양한 번역기 지원
-- [] cuda 지원
-- [] pypi 지원
-- [] Gradio 기반 GUI 지원 
+- [ ] paddleocr 기반 이미지/영상 자막 생성 지원
+- [ ] 구글, deepl, marianMT, NLLB, MBart 등 다양한 번역기 지원
+- [ ] cuda 지원
+- [ ] pypi 지원
+- [ ] Gradio 기반 GUI 지원 
 
 ## License
 이 프로젝트는 MIT 라이선스 하에 보호받고 있습니다. 자세한 정보는 LICENSE 파일을 참조하세요.
