@@ -22,6 +22,7 @@ classifiers = [
 ]
 dependencies = [ # paddlepaddle, torch는 별도 설치
     "whisperx",
+    "deep-translator",
     # "transformers",
     # "opencv-python",
     # "paddleocr",

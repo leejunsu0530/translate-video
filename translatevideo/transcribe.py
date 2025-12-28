@@ -16,7 +16,7 @@ from typing import Literal, Optional, Any
 from pathlib import Path
 from numpy import ndarray
 
-AVAILABLE_WHISPER_MODELS = [
+WhisperModels = Literal[
     "tiny",
     "tiny.en",
     "base",
@@ -47,20 +47,15 @@ LanguageCodes = Literal['en', 'zh', 'de', 'es', 'ru', 'ko', 'fr', 'ja', 'pt', 't
 
 class WhisperXTranscriber:
     def __init__(self,
-                 whisper_model_name: Literal["tiny", "tiny.en", "base", "base.en", "small",
-                                             "small.en", "distil-small.en", "medium", "medium.en",
-                                             "distil-medium.en", "large-v1", "large-v2", "large-v3",
-                                             "large", "distil-large-v2", "distil-large-v3", "large-v3-turbo",
-                                             "turbo"] = "large-v2",
+                 whisper_model_name: WhisperModels = "large-v2",
                  device: Literal["cpu", "cuda", "auto"] = "auto",
                  num_workers: int = 0,
                  batch_size: int = 4,
                  compute_type: Literal['default', 'auto', 'int8', 'int8_float32', 'int8_float16',
-                                       'int8_bfloat16', 'int16', 'float16', 'float32', 'bfloat16'] = "float16",
+                                       'int8_bfloat16', 'int16', 'float16', 'float32', 'bfloat16'] = "auto",
                  language_code: LanguageCodes | None = None,
                  print_progress: bool = True,
                  combined_progress: bool = False,
-                 use_diarization: bool = False,
                  hf_token: Optional[str] = None,
                  min_speakers: Optional[int] = None,
                  max_speakers: Optional[int] = None,
@@ -82,7 +77,6 @@ class WhisperXTranscriber:
             language_code: language code for **transcribe** and **align** method. If None, language will be detected automatically.
             print_progress: Whether to print progress through whisperx at **transcribe** and **align** method.
             combined_progress: Whether to use combined progress.
-            use_diarization: Whether to use **diarize** method at **transcribe_auto** method.    
             hf_token: HuggingFace authentication token for **diarization** model download.
             min_speakers: Minimum number of speakers for **diarize** method. Add it if known.
             max_speakers: Maximum number of speakers for **diarize** method. Add it if known.
@@ -96,7 +90,6 @@ class WhisperXTranscriber:
         self.language_code = language_code
         self.print_progress = print_progress
         self.combined_progress = combined_progress
-        self.use_diarization = use_diarization
         self.hf_token = hf_token
         self.min_speakers = min_speakers
         self.max_speakers = max_speakers
@@ -108,7 +101,7 @@ class WhisperXTranscriber:
             gc.collect()
             torch.cuda.empty_cache()
 
-    def transcribe_auto(self, audio_file: str | Path) -> tuple[TranscriptionResult, LanguageCodes]:
+    def auto_transcribe(self, audio_file: str | Path) -> tuple[TranscriptionResult, LanguageCodes]:
         """
         Because whisperx itself preprocesses audio file, any type of audio file can be given.
         """
@@ -121,8 +114,7 @@ class WhisperXTranscriber:
         result = self.align(result, audio)
 
         # 3. Assign speaker labels
-        if self.use_diarization:
-            result = self.diarize(audio, result)
+        result = self.diarize(audio, result)
 
         return result, language
 
@@ -184,10 +176,12 @@ class WhisperXTranscriber:
                 ) -> AlignedTranscriptionResult | TranscriptionResult:
         """
         you can also use this function by itself if you have transcription result.
+        **if hf_token is not provided, diarization will be skipped.**
         """
         if self.hf_token is None:
-            raise ValueError(
-                "HuggingFace token must be provided for diarization model download.")
+            print(
+                "[Warning] HuggingFace token must be provided for diarization model download. Skipping diarization.")
+            return transcription_result
 
         if isinstance(audio, (str, Path)):
             audio = whisperx.load_audio(str(audio))
