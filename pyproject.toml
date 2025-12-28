@@ -30,7 +30,9 @@ dependencies = [ # paddlepaddle, torch는 별도 설치
 gui = [
     "gradio"
 ]
-# dev = []
+dev = [
+    "pip-licenses"
+]
 
 [project.scripts]
 tr-video = "translatevideo.__main__:main" # 모듈경로:함수이름 구조
