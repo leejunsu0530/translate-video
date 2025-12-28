@@ -37,6 +37,13 @@ AVAILABLE_WHISPER_MODELS = [
     "turbo"
 ]
 
+LanguageCodes = Literal['en', 'zh', 'de', 'es', 'ru', 'ko', 'fr', 'ja', 'pt', 'tr', 'pl', 'ca', 'nl', 'ar', 'sv', 'it', 'id', 'hi',
+                        'fi', 'vi', 'he', 'uk', 'el', 'ms', 'cs', 'ro', 'da', 'hu', 'ta', 'no', 'th', 'ur', 'hr', 'bg', 'lt', 'la',
+                        'mi', 'ml', 'cy', 'sk', 'te', 'fa', 'lv', 'bn', 'sr', 'az', 'sl', 'kn', 'et', 'mk', 'br', 'eu', 'is', 'hy',
+                        'ne', 'mn', 'bs', 'kk', 'sq', 'sw', 'gl', 'mr', 'pa', 'si', 'km', 'sn', 'yo', 'so', 'af', 'oc', 'ka', 'be',
+                        'tg', 'sd', 'gu', 'am', 'yi', 'lo', 'uz', 'fo', 'ht', 'ps', 'tk', 'nn', 'mt', 'sa', 'lb', 'my', 'bo', 'tl',
+                        'mg', 'as', 'tt', 'haw', 'ln', 'ha', 'ba', 'jw', 'su', 'yue']
+
 
 class WhisperXTranscriber:
     def __init__(self,
@@ -50,12 +57,7 @@ class WhisperXTranscriber:
                  batch_size: int = 4,
                  compute_type: Literal['default', 'auto', 'int8', 'int8_float32', 'int8_float16',
                                        'int8_bfloat16', 'int16', 'float16', 'float32', 'bfloat16'] = "float16",
-                 language_code: Literal['en', 'zh', 'de', 'es', 'ru', 'ko', 'fr', 'ja', 'pt', 'tr', 'pl', 'ca', 'nl', 'ar', 'sv', 'it', 'id', 'hi',
-                                        'fi', 'vi', 'he', 'uk', 'el', 'ms', 'cs', 'ro', 'da', 'hu', 'ta', 'no', 'th', 'ur', 'hr', 'bg', 'lt', 'la',
-                                        'mi', 'ml', 'cy', 'sk', 'te', 'fa', 'lv', 'bn', 'sr', 'az', 'sl', 'kn', 'et', 'mk', 'br', 'eu', 'is', 'hy',
-                                        'ne', 'mn', 'bs', 'kk', 'sq', 'sw', 'gl', 'mr', 'pa', 'si', 'km', 'sn', 'yo', 'so', 'af', 'oc', 'ka', 'be',
-                                        'tg', 'sd', 'gu', 'am', 'yi', 'lo', 'uz', 'fo', 'ht', 'ps', 'tk', 'nn', 'mt', 'sa', 'lb', 'my', 'bo', 'tl',
-                                        'mg', 'as', 'tt', 'haw', 'ln', 'ha', 'ba', 'jw', 'su', 'yue'] | None = None,
+                 language_code: LanguageCodes | None = None,
                  print_progress: bool = True,
                  combined_progress: bool = False,
                  use_diarization: bool = False,
@@ -106,13 +108,14 @@ class WhisperXTranscriber:
             gc.collect()
             torch.cuda.empty_cache()
 
-    def transcribe_auto(self, audio_file: str | Path) -> TranscriptionResult:
+    def transcribe_auto(self, audio_file: str | Path) -> tuple[TranscriptionResult, LanguageCodes]:
         """
         Because whisperx itself preprocesses audio file, any type of audio file can be given.
         """
         audio = whisperx.load_audio(str(audio_file))
         # 1. Transcribe with whisper
         result = self.transcribe(audio)
+        language = result["language"]
 
         # 2. Align whisper output
         result = self.align(result, audio)
@@ -121,7 +124,7 @@ class WhisperXTranscriber:
         if self.use_diarization:
             result = self.diarize(audio, result)
 
-        return result
+        return result, language
 
     def load_audio(self, audio_file: str | Path | ndarray) -> ndarray:
         """
