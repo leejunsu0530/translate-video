@@ -214,28 +214,3 @@ class PwcppTranscriber(WhisperXTranscriber):
         """
 
 
-class InsanelyFasterWhisperTranscriber(WhisperXTranscriber):
-    def __init__(self,
-                 whisper_model_name: WhisperModels = "large-v2",
-                 device: Literal["cpu", "cuda", "auto"] = "auto",
-                 num_workers: int = 0,
-                 batch_size: int = 4,
-                 compute_type: Literal['default', 'auto', 'int8', 'int8_float32', 'int8_float16',
-                                       'int8_bfloat16', 'int16', 'float16', 'float32', 'bfloat16'] = "auto",
-                 language_code: LanguageCodes | None = None,
-                 print_progress: bool = True,
-                 combined_progress: bool = False,
-                 hf_token: Optional[str] = None,
-                 min_speakers: Optional[int] = None,
-                 max_speakers: Optional[int] = None,
-                 delete_used_models: bool = True
-                 ) -> None:
-        super().__init__(whisper_model_name, device, num_workers, batch_size, compute_type,
-                         language_code, print_progress, combined_progress, hf_token,
-                         min_speakers, max_speakers, delete_used_models)
-        # 추후 insanely_faster_whisper 관련 초기화 코드 추가 가능
-
-    def transcribe(self, audio_file: str | Path | ndarray) -> TranscriptionResult:
-        """
-        overrides faster_whisper transcribe method to use insanely_faster_whisper and vad
-        """
