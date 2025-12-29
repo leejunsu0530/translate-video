@@ -10,6 +10,7 @@ TODO:
 import whisperx  # type: ignore
 import gc
 import torch
+from whisperx.vads import Vad   # type: ignore
 from whisperx.diarize import DiarizationPipeline  # type: ignore
 from whisperx.schema import AlignedTranscriptionResult, TranscriptionResult  # type: ignore
 from whisperx.utils import LANGUAGES
@@ -21,9 +22,12 @@ from translatevideo.utils.type_hints import LanguageNames
 from translatevideo.utils.type_hints import LanguageCodes
 from translatevideo.utils.type_hints import WhisperModels
 
+
 class WhisperXTranscriber:
     def __init__(self,
                  whisper_model_name: WhisperModels = "large-v2",
+                 vad_model: Optional[Vad] = None,
+                 vad_method: Literal["pwcpp", "silero"] = "silero",
                  device: Literal["cpu", "cuda", "xpu"] = "cpu",
                  num_workers: int = 0,
                  batch_size: int = 4,
@@ -42,6 +46,8 @@ class WhisperXTranscriber:
 
         Args:
             whisper_model_name: Size of the model to use (tiny, tiny.en, base, base.en, small, small.en, distil-small.en, medium, medium.en, distil-medium.en, large-v1,large-v2, large-v3, large, distil-large-v2, distil-large-v3, large-v3-turbo, or turbo)
+            vad_model: The vad model to manually assign.
+            vad_method: The vad method to use. vad_model has a higher priority if it is not None. **currently, torch higher than 2.6 causes error with pyannote vad, so please use silero vad instead**
             device: device to run the model on (cpu, cuda, xpu). "auto" is not supported here. "xpu" is not tested yet.
             num_workers: number of workers for **transcript** method
             batch_size: number of batches for **transcript** method. reduce if low on GPU mem
@@ -60,7 +66,7 @@ class WhisperXTranscriber:
             """
         self.device = device
         self.model = whisperx.load_model(
-            whisper_model_name, device, compute_type=compute_type)
+            whisper_model_name, device, compute_type=compute_type, vad_model=vad_model, vad_method=vad_method)
         self.num_workers = num_workers
         self.batch_size = batch_size
         self.language_code = language_code
@@ -77,7 +83,7 @@ class WhisperXTranscriber:
             gc.collect()
             torch.cuda.empty_cache()
 
-    def auto_transcribe(self, audio_file: str | Path) -> tuple[TranscriptionResult, LanguageCodes]:
+    def auto_transcribe(self, audio_file: str | Path) -> tuple[TranscriptionResult, LanguageNames]:
         """
         Because whisperx itself preprocesses audio file, any type of audio file can be given.
         """
@@ -190,6 +196,8 @@ class WhisperXTranscriber:
 class PwcppTranscriber(WhisperXTranscriber):
     def __init__(self,
                  whisper_model_name: WhisperModels = "large-v2",
+                 vad_model: Optional[Vad] = None,
+                 vad_method: Literal["pwcpp", "silero"] = "silero",
                  device: Literal["cpu", "cuda", "auto"] = "auto",
                  num_workers: int = 0,
                  batch_size: int = 4,
@@ -203,7 +211,7 @@ class PwcppTranscriber(WhisperXTranscriber):
                  max_speakers: Optional[int] = None,
                  delete_used_models: bool = True
                  ) -> None:
-        super().__init__(whisper_model_name, device, num_workers, batch_size, compute_type,
+        super().__init__(whisper_model_name, device, vad_model, vad_method, num_workers, batch_size, compute_type,
                          language_code, print_progress, combined_progress, hf_token,
                          min_speakers, max_speakers, delete_used_models)
         # 추후 pwcpp 관련 초기화 코드 추가 가능
@@ -212,5 +220,3 @@ class PwcppTranscriber(WhisperXTranscriber):
         """
         overrides faster_whisper transcribe method to use pwcpp and vad
         """
-
-
