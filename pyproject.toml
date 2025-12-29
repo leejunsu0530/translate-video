@@ -21,7 +21,7 @@ classifiers = [
     "License :: OSI Approved :: MIT License"
 ]
 dependencies = [ # paddlepaddle, torch는 별도 설치
-    "git+https://github.com/m-bain/whisperX",
+    "whisperx @ git+https://github.com/m-bain/whisperX",
     "deep-translator",
     # "transformers",
     # "opencv-python",
