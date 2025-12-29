@@ -1,8 +1,0 @@
-# py -3.11 -m venv .venv && .venv/scripts/activate && pip install -r requirements.txt 
-# pywhispercpp
-yt-dlp
-whisperx
-
-# paddlepaddle
-# https://www.paddlepaddle.org.cn/packages/stable/cpu/paddlepaddle/
-# paddleocr
