@@ -24,7 +24,7 @@ from translatevideo.utils.type_hints import WhisperModels
 class WhisperXTranscriber:
     def __init__(self,
                  whisper_model_name: WhisperModels = "large-v2",
-                 device: Literal["cpu", "cuda", "auto"] = "auto",
+                 device: Literal["cpu", "cuda", "xpu"] = "cpu",
                  num_workers: int = 0,
                  batch_size: int = 4,
                  compute_type: Literal['default', 'auto', 'int8', 'int8_float32', 'int8_float16',
@@ -42,7 +42,7 @@ class WhisperXTranscriber:
 
         Args:
             whisper_model_name: Size of the model to use (tiny, tiny.en, base, base.en, small, small.en, distil-small.en, medium, medium.en, distil-medium.en, large-v1,large-v2, large-v3, large, distil-large-v2, distil-large-v3, large-v3-turbo, or turbo)
-            device: "cpu", "cuda", or "auto"
+            device: device to run the model on (cpu, cuda, xpu). "auto" is not supported here. "xpu" is not tested yet.
             num_workers: number of workers for **transcript** method
             batch_size: number of batches for **transcript** method. reduce if low on GPU mem
             compute_type:
