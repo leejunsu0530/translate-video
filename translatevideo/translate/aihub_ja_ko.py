@@ -5,7 +5,7 @@ from transformers import (
     PreTrainedTokenizer,
 
 )
-from .translate import Translator
+from .base import TranslatorBase
 import torch
 
 

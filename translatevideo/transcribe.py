@@ -12,38 +12,14 @@ import gc
 import torch
 from whisperx.diarize import DiarizationPipeline  # type: ignore
 from whisperx.schema import AlignedTranscriptionResult, TranscriptionResult  # type: ignore
+from whisperx.utils import LANGUAGES
 from typing import Literal, Optional, Any
 from pathlib import Path
 from numpy import ndarray
 
-WhisperModels = Literal[
-    "tiny",
-    "tiny.en",
-    "base",
-    "base.en",
-    "small",
-    "small.en",
-    "distil-small.en",
-    "medium",
-    "medium.en",
-    "distil-medium.en",
-    "large-v1",
-    "large-v2",
-    "large-v3",
-    "large",
-    "distil-large-v2",
-    "distil-large-v3",
-    "large-v3-turbo",
-    "turbo"
-]
-
-LanguageCodes = Literal['en', 'zh', 'de', 'es', 'ru', 'ko', 'fr', 'ja', 'pt', 'tr', 'pl', 'ca', 'nl', 'ar', 'sv', 'it', 'id', 'hi',
-                        'fi', 'vi', 'he', 'uk', 'el', 'ms', 'cs', 'ro', 'da', 'hu', 'ta', 'no', 'th', 'ur', 'hr', 'bg', 'lt', 'la',
-                        'mi', 'ml', 'cy', 'sk', 'te', 'fa', 'lv', 'bn', 'sr', 'az', 'sl', 'kn', 'et', 'mk', 'br', 'eu', 'is', 'hy',
-                        'ne', 'mn', 'bs', 'kk', 'sq', 'sw', 'gl', 'mr', 'pa', 'si', 'km', 'sn', 'yo', 'so', 'af', 'oc', 'ka', 'be',
-                        'tg', 'sd', 'gu', 'am', 'yi', 'lo', 'uz', 'fo', 'ht', 'ps', 'tk', 'nn', 'mt', 'sa', 'lb', 'my', 'bo', 'tl',
-                        'mg', 'as', 'tt', 'haw', 'ln', 'ha', 'ba', 'jw', 'su', 'yue']
-
+from translatevideo.utils.type_hints import LanguageNames
+from translatevideo.utils.type_hints import LanguageCodes
+from translatevideo.utils.type_hints import WhisperModels
 
 class WhisperXTranscriber:
     def __init__(self,
@@ -108,7 +84,7 @@ class WhisperXTranscriber:
         audio = whisperx.load_audio(str(audio_file))
         # 1. Transcribe with whisper
         result = self.transcribe(audio)
-        language = result["language"]
+        language_name = self.load_language_name(result)
 
         # 2. Align whisper output
         result = self.align(result, audio)
@@ -116,7 +92,14 @@ class WhisperXTranscriber:
         # 3. Assign speaker labels
         result = self.diarize(audio, result)
 
-        return result, language
+        return result, language_name
+
+    def load_language_name(self, transciption_result: TranscriptionResult) -> LanguageNames:
+        """
+        load language name from language code
+        """
+        language_code = transciption_result["language"] or self.language_code
+        return LANGUAGES[language_code]
 
     def load_audio(self, audio_file: str | Path | ndarray) -> ndarray:
         """
@@ -202,3 +185,57 @@ class WhisperXTranscriber:
 
         self.delete_model(diarize_model)
         return diarized_result
+
+
+class PwcppTranscriber(WhisperXTranscriber):
+    def __init__(self,
+                 whisper_model_name: WhisperModels = "large-v2",
+                 device: Literal["cpu", "cuda", "auto"] = "auto",
+                 num_workers: int = 0,
+                 batch_size: int = 4,
+                 compute_type: Literal['default', 'auto', 'int8', 'int8_float32', 'int8_float16',
+                                       'int8_bfloat16', 'int16', 'float16', 'float32', 'bfloat16'] = "auto",
+                 language_code: LanguageCodes | None = None,
+                 print_progress: bool = True,
+                 combined_progress: bool = False,
+                 hf_token: Optional[str] = None,
+                 min_speakers: Optional[int] = None,
+                 max_speakers: Optional[int] = None,
+                 delete_used_models: bool = True
+                 ) -> None:
+        super().__init__(whisper_model_name, device, num_workers, batch_size, compute_type,
+                         language_code, print_progress, combined_progress, hf_token,
+                         min_speakers, max_speakers, delete_used_models)
+        # 추후 pwcpp 관련 초기화 코드 추가 가능
+
+    def transcribe(self, audio_file: str | Path | ndarray) -> TranscriptionResult:
+        """
+        overrides faster_whisper transcribe method to use pwcpp and vad
+        """
+
+
+class InsanelyFasterWhisperTranscriber(WhisperXTranscriber):
+    def __init__(self,
+                 whisper_model_name: WhisperModels = "large-v2",
+                 device: Literal["cpu", "cuda", "auto"] = "auto",
+                 num_workers: int = 0,
+                 batch_size: int = 4,
+                 compute_type: Literal['default', 'auto', 'int8', 'int8_float32', 'int8_float16',
+                                       'int8_bfloat16', 'int16', 'float16', 'float32', 'bfloat16'] = "auto",
+                 language_code: LanguageCodes | None = None,
+                 print_progress: bool = True,
+                 combined_progress: bool = False,
+                 hf_token: Optional[str] = None,
+                 min_speakers: Optional[int] = None,
+                 max_speakers: Optional[int] = None,
+                 delete_used_models: bool = True
+                 ) -> None:
+        super().__init__(whisper_model_name, device, num_workers, batch_size, compute_type,
+                         language_code, print_progress, combined_progress, hf_token,
+                         min_speakers, max_speakers, delete_used_models)
+        # 추후 insanely_faster_whisper 관련 초기화 코드 추가 가능
+
+    def transcribe(self, audio_file: str | Path | ndarray) -> TranscriptionResult:
+        """
+        overrides faster_whisper transcribe method to use insanely_faster_whisper and vad
+        """
