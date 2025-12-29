@@ -211,7 +211,7 @@ class PwcppTranscriber(WhisperXTranscriber):
                  max_speakers: Optional[int] = None,
                  delete_used_models: bool = True
                  ) -> None:
-        super().__init__(whisper_model_name, device, vad_model, vad_method, num_workers, batch_size, compute_type,
+        super().__init__(whisper_model_name, vad_model, vad_method, device, num_workers, batch_size, compute_type,
                          language_code, print_progress, combined_progress, hf_token,
                          min_speakers, max_speakers, delete_used_models)
         # 추후 pwcpp 관련 초기화 코드 추가 가능
