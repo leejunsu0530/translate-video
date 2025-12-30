@@ -66,7 +66,7 @@ class WhisperXTranscriber:
             """
         self.device = device
         self.model = whisperx.load_model(
-            whisper_model_name, device, compute_type=compute_type, vad_model=vad_model, vad_method=vad_method)
+            whisper_model_name, device, compute_type=compute_type, language=language, vad_model=vad_model, vad_method=vad_method)
         self.num_workers = num_workers
         self.batch_size = batch_size
         self.language_code = language_code
@@ -127,7 +127,7 @@ class WhisperXTranscriber:
             audio,
             batch_size=self.batch_size,
             num_workers=self.num_workers,
-            language=self.language_code,
+            # language=self.language_code,
             print_progress=self.print_progress,
             combined_progress=self.combined_progress
         )
