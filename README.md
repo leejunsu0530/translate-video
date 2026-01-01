@@ -91,6 +91,10 @@
    
    ```powershell
    python -m pip install git+https://github.com/leejunsu0530/translate-video
+
+   
+   # 설치해야 할 의존성이 많아서 Rust 기반인 uv를 사용하는 걸 추천한다. pip install uv로 설치할 수 있다.
+   uv pip install git+https://github.com/leejunsu0530/translate-video
    ```
 
 ## Usage
