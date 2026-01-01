@@ -66,7 +66,7 @@ class WhisperXTranscriber:
             """
         self.device = device
         self.model = whisperx.load_model(
-            whisper_model_name, device, compute_type=compute_type, language=language, vad_model=vad_model, vad_method=vad_method)
+            whisper_model_name, device, compute_type=compute_type, language=language_code, vad_model=vad_model, vad_method=vad_method)
         self.num_workers = num_workers
         self.batch_size = batch_size
         self.language_code = language_code
@@ -83,7 +83,7 @@ class WhisperXTranscriber:
             gc.collect()
             torch.cuda.empty_cache()
 
-    def auto_transcribe(self, audio_file: str | Path) -> tuple[TranscriptionResult, LanguageNames]:
+    def auto_transcribe(self, audio_file: str | Path, use_diarization: bool = True) -> tuple[TranscriptionResult, LanguageNames]:
         """
         Because whisperx itself preprocesses audio file, any type of audio file can be given.
         """
@@ -96,7 +96,8 @@ class WhisperXTranscriber:
         result = self.align(result, audio)
 
         # 3. Assign speaker labels
-        result = self.diarize(audio, result)
+        if use_diarization:
+            result = self.diarize(audio, result)
 
         return result, language_name
 
@@ -117,11 +118,13 @@ class WhisperXTranscriber:
             audio = audio_file
         return audio
 
-    def transcribe(self, audio_file: str | Path | ndarray) -> TranscriptionResult:
+    def transcribe(self, audio_file: str | Path | ndarray, additional_args: Optional[dict] = None) -> TranscriptionResult:
         """
         you can also use this function by itself if you don't need alignment and diarization
         """
         audio = self.load_audio(audio_file)
+        if additional_args is None:
+            additional_args = {}
 
         result = self.model.transcribe(
             audio,
@@ -129,7 +132,8 @@ class WhisperXTranscriber:
             num_workers=self.num_workers,
             # language=self.language_code,
             print_progress=self.print_progress,
-            combined_progress=self.combined_progress
+            combined_progress=self.combined_progress,
+            **additional_args
         )
 
         self.delete_model(self.model)
@@ -137,12 +141,15 @@ class WhisperXTranscriber:
 
     def align(self,
               transcription_result: TranscriptionResult,
-              audio: str | Path | ndarray
+              audio: str | Path | ndarray,
+              additional_args: Optional[dict] = None,
               ) -> AlignedTranscriptionResult:
         """
         you can also use this function by itself if you have transcription result and don't need diarization.
         """
         audio = self.load_audio(audio)
+        if additional_args is None:
+            additional_args = {}
 
         language_code = transcription_result["language"] or self.language_code
 
@@ -153,7 +160,8 @@ class WhisperXTranscriber:
             audio, self.device,
             return_char_alignments=False,
             print_progress=self.print_progress,
-            combined_progress=self.combined_progress
+            combined_progress=self.combined_progress,
+            **additional_args
         )
 
         self.delete_model(model_a)
@@ -161,7 +169,8 @@ class WhisperXTranscriber:
 
     def diarize(self,
                 audio: str | Path | ndarray,
-                transcription_result: TranscriptionResult | AlignedTranscriptionResult
+                transcription_result: TranscriptionResult | AlignedTranscriptionResult,
+                additional_args: Optional[dict] = None
                 ) -> AlignedTranscriptionResult | TranscriptionResult:
         """
         you can also use this function by itself if you have transcription result.
@@ -172,8 +181,9 @@ class WhisperXTranscriber:
                 "[Warning] HuggingFace token must be provided for diarization model download. Skipping diarization.")
             return transcription_result
 
-        if isinstance(audio, (str, Path)):
-            audio = whisperx.load_audio(str(audio))
+        audio = self.load_audio(audio)
+        if additional_args is None:
+            additional_args = {}
 
         diarize_model = DiarizationPipeline(
             use_auth_token=self.hf_token, device=self.device)
@@ -186,7 +196,8 @@ class WhisperXTranscriber:
 
         diarized_result = whisperx.assign_word_speakers(
             diarize_segments,
-            transcription_result
+            transcription_result,
+            **additional_args
         )
 
         self.delete_model(diarize_model)
@@ -195,21 +206,48 @@ class WhisperXTranscriber:
 
 class PwcppTranscriber(WhisperXTranscriber):
     def __init__(self,
-                 whisper_model_name: WhisperModels = "large-v2",
-                 vad_model: Optional[Vad] = None,
-                 vad_method: Literal["pwcpp", "silero"] = "silero",
-                 device: Literal["cpu", "cuda", "auto"] = "auto",
-                 num_workers: int = 0,
-                 batch_size: int = 4,
-                 compute_type: Literal['default', 'auto', 'int8', 'int8_float32', 'int8_float16',
-                                       'int8_bfloat16', 'int16', 'float16', 'float32', 'bfloat16'] = "auto",
-                 language_code: LanguageCodes | None = None,
-                 print_progress: bool = True,
-                 combined_progress: bool = False,
-                 hf_token: Optional[str] = None,
-                 min_speakers: Optional[int] = None,
-                 max_speakers: Optional[int] = None,
-                 delete_used_models: bool = True
+                 whisper_model_name="large-v2",
+                 vad_model=None,
+                 vad_method="silero",
+                 device="auto",
+                 num_workers=0,
+                 batch_size=4,
+                 compute_type="auto",
+                 language_code=None,
+                 print_progress=True,
+                 combined_progress=False,
+                 hf_token=None,
+                 min_speakers=None,
+                 max_speakers=None,
+                 delete_used_models=True
+                 ) -> None:
+        super().__init__(whisper_model_name, vad_model, vad_method, device, num_workers, batch_size, compute_type,
+                         language_code, print_progress, combined_progress, hf_token,
+                         min_speakers, max_speakers, delete_used_models)
+        # 추후 pwcpp 관련 초기화 코드 추가 가능
+
+    def transcribe(self, audio_file: str | Path | ndarray) -> TranscriptionResult:
+        """
+        overrides faster_whisper transcribe method to use pwcpp and vad
+        """
+
+
+class PwcppTranscriberOV(WhisperXTranscriber):
+    def __init__(self,
+                 whisper_model_name="large-v2",
+                 vad_model=None,
+                 vad_method="silero",
+                 device="auto",
+                 num_workers=0,
+                 batch_size=4,
+                 compute_type="auto",
+                 language_code=None,
+                 print_progress=True,
+                 combined_progress=False,
+                 hf_token=None,
+                 min_speakers=None,
+                 max_speakers=None,
+                 delete_used_models=True
                  ) -> None:
         super().__init__(whisper_model_name, vad_model, vad_method, device, num_workers, batch_size, compute_type,
                          language_code, print_progress, combined_progress, hf_token,
