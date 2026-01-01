@@ -27,7 +27,7 @@ class WhisperXTranscriber:
     def __init__(self,
                  whisper_model_name: WhisperModels = "large-v2",
                  vad_model: Optional[Vad] = None,
-                 vad_method: Literal["pwcpp", "silero"] = "silero",
+                 vad_method: Literal["pyannote", "silero"] = "silero",
                  device: Literal["cpu", "cuda", "xpu"] = "cpu",
                  num_workers: int = 0,
                  batch_size: int = 4,
