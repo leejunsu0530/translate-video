@@ -67,10 +67,10 @@
       <summary><b>paddlepaddle 설치</b></summary>
       
       [공식 사이트 설치 가이드](https://www.paddlepaddle.org.cn/en/install/quick?docurl=/documentation/docs/en/develop/install/pip/windows-pip_en.html)
-   에서 자신의 환경에 맞게 설정하면 설치 명령어가 아래와 같이 나온다.
+  에서 자신의 환경에 맞게 설정하면 설치 명령어가 아래와 같이 나온다.
 
    ```powershell
-      python -m pip install paddlepaddle==3.2.2 -i https://www.paddlepaddle.org.cn/packages/stable/cpu/
+python -m pip install paddlepaddle==3.2.2 -i https://www.paddlepaddle.org.cn/packages/stable/cpu/
    ```    
    </details>
 
@@ -91,9 +91,12 @@
    
    ```powershell
    python -m pip install git+https://github.com/leejunsu0530/translate-video
+   ```
 
    
-   # 설치해야 할 의존성이 많아서 Rust 기반인 uv를 사용하는 걸 추천한다. pip install uv로 설치할 수 있다.
+   설치해야 할 의존성이 많아서 Rust 기반인 [uv](https://github.com/astral-sh/uv)를 사용하는 걸 추천한다.
+``` 
+# pip install uv로 설치할 수 있다.
    uv pip install git+https://github.com/leejunsu0530/translate-video
    ```
 
