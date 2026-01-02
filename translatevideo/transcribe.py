@@ -17,6 +17,7 @@ from whisperx.utils import LANGUAGES
 from typing import Literal, Optional, Any
 from pathlib import Path
 from numpy import ndarray
+from omegaconf import ListConfig
 
 from translatevideo.utils.type_hints import LanguageNames
 from translatevideo.utils.type_hints import LanguageCodes
@@ -65,8 +66,6 @@ class WhisperXTranscriber:
             delete_used_models: Whether to delete models after use to free up memory.
             """
         self.device = device
-        self.model = whisperx.load_model(
-            whisper_model_name, device, compute_type=compute_type, language=language_code, vad_model=vad_model, vad_method=vad_method)
         self.num_workers = num_workers
         self.batch_size = batch_size
         self.language_code = language_code
@@ -76,6 +75,13 @@ class WhisperXTranscriber:
         self.min_speakers = min_speakers
         self.max_speakers = max_speakers
         self.delete_used_models = delete_used_models
+        with torch.serialization.safe_globals([ListConfig]):
+            self.model = whisperx.load_model(whisper_model_name,
+                                             device,
+                                             compute_type=compute_type,
+                                             language=language_code,
+                                             vad_model=vad_model,
+                                             vad_method=vad_method)
 
     def delete_model(self, model: Any) -> None:
         if self.delete_used_models:
@@ -221,40 +227,7 @@ class PwcppTranscriber(WhisperXTranscriber):
                  max_speakers=None,
                  delete_used_models=True
                  ) -> None:
-        super().__init__(whisper_model_name, vad_model, vad_method, device, num_workers, batch_size, compute_type,
-                         language_code, print_progress, combined_progress, hf_token,
-                         min_speakers, max_speakers, delete_used_models)
+        pass
+        # vad 호출(위에서 정한대로)
+        # pwcpp 호출. ov 버전도 이제 통합됨
         # 추후 pwcpp 관련 초기화 코드 추가 가능
-
-    def transcribe(self, audio_file: str | Path | ndarray) -> TranscriptionResult:
-        """
-        overrides faster_whisper transcribe method to use pwcpp and vad
-        """
-
-
-class PwcppTranscriberOV(WhisperXTranscriber):
-    def __init__(self,
-                 whisper_model_name="large-v2",
-                 vad_model=None,
-                 vad_method="silero",
-                 device="auto",
-                 num_workers=0,
-                 batch_size=4,
-                 compute_type="auto",
-                 language_code=None,
-                 print_progress=True,
-                 combined_progress=False,
-                 hf_token=None,
-                 min_speakers=None,
-                 max_speakers=None,
-                 delete_used_models=True
-                 ) -> None:
-        super().__init__(whisper_model_name, vad_model, vad_method, device, num_workers, batch_size, compute_type,
-                         language_code, print_progress, combined_progress, hf_token,
-                         min_speakers, max_speakers, delete_used_models)
-        # 추후 pwcpp 관련 초기화 코드 추가 가능
-
-    def transcribe(self, audio_file: str | Path | ndarray) -> TranscriptionResult:
-        """
-        overrides faster_whisper transcribe method to use pwcpp and vad
-        """
