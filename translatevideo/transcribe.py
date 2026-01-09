@@ -1,23 +1,22 @@
 """
 part of the code is adapted from example code of whisperx
 TODO:
-- ~init에서 model_a, metadata 튜플로 묶어서 처리, 언어코드 없을 경우만 객체 다시 생성~
-    - 이 부분은 불러오기 함수가 그다지 무거워보이지 않아서 상관x. 언어 코드 강제 지정만 추가?
-- SRT 저장 기능 구현
+- 오디오가 길 경우 메모리 관리를 위해 쪼개서 처리
 - 불러오기 함수에 모델 이름 지정 기능 등 있는데 그거 활용할 수 있게 하기
 - 나중에 다중상속 고려한 설계
 """
 import whisperx  # type: ignore
 import gc
 import torch
+import platform
 from whisperx.vads import Vad   # type: ignore
 from whisperx.diarize import DiarizationPipeline  # type: ignore
 from whisperx.schema import AlignedTranscriptionResult, TranscriptionResult  # type: ignore
-from whisperx.utils import LANGUAGES
+from whisperx.utils import LANGUAGES  # type: ignore
 from typing import Literal, Optional, Any
 from pathlib import Path
 from numpy import ndarray
-from omegaconf import ListConfig
+from rich import print
 
 from translatevideo.utils.type_hints import LanguageNames
 from translatevideo.utils.type_hints import LanguageCodes
@@ -50,7 +49,7 @@ class WhisperXTranscriber:
             vad_model: The vad model to manually assign.
             vad_method: The vad method to use. vad_model has a higher priority if it is not None. **currently, torch higher than 2.6 causes error with pyannote vad, so please use silero vad instead**
             device: device to run the model on (cpu, cuda, xpu). "auto" is not supported here. "xpu" is not tested yet.
-            num_workers: number of workers for **transcript** method
+            num_workers: number of workers for **transcript** method. **Can't be used at windows and it will automatically be 0.**
             batch_size: number of batches for **transcript** method. reduce if low on GPU mem
             compute_type:
                 change to "int8" if low on GPU mem (may reduce accuracy)
@@ -66,7 +65,12 @@ class WhisperXTranscriber:
             delete_used_models: Whether to delete models after use to free up memory.
             """
         self.device = device
-        self.num_workers = num_workers
+        if platform.system() == "Windows" and num_workers != 0:
+            print(
+                f"[yellow][Warning][/] {self.__class__.__name__}.{self.__class__.__init__.__name__}: num_workers can't be used at Windows OS. Setting num_workers to 0.")
+            self.num_workers = 0
+        else:
+            self.num_workers = num_workers
         self.batch_size = batch_size
         self.language_code = language_code
         self.print_progress = print_progress
@@ -75,13 +79,13 @@ class WhisperXTranscriber:
         self.min_speakers = min_speakers
         self.max_speakers = max_speakers
         self.delete_used_models = delete_used_models
-        with torch.serialization.safe_globals([ListConfig]):
-            self.model = whisperx.load_model(whisper_model_name,
-                                             device,
-                                             compute_type=compute_type,
-                                             language=language_code,
-                                             vad_model=vad_model,
-                                             vad_method=vad_method)
+        # with torch.serialization.safe_globals([ListConfig]): # num workers 0이면 상관 x
+        self.model = whisperx.load_model(whisper_model_name,
+                                         device,
+                                         compute_type=compute_type,
+                                         language=language_code,
+                                         vad_model=vad_model,
+                                         vad_method=vad_method)
 
     def delete_model(self, model: Any) -> None:
         if self.delete_used_models:
@@ -95,14 +99,17 @@ class WhisperXTranscriber:
         """
         audio = whisperx.load_audio(str(audio_file))
         # 1. Transcribe with whisper
+        print("[green][Info][/] Starting transcription...")
         result = self.transcribe(audio)
         language_name = self.load_language_name(result)
 
         # 2. Align whisper output
+        print("[green][Info][/] Starting alignment...")
         result = self.align(result, audio)
 
         # 3. Assign speaker labels
         if use_diarization:
+            print("[green][Info][/] Starting diarization...")
             result = self.diarize(audio, result)
 
         return result, language_name
@@ -184,7 +191,7 @@ class WhisperXTranscriber:
         """
         if self.hf_token is None:
             print(
-                "[Warning] HuggingFace token must be provided for diarization model download. Skipping diarization.")
+                f"[yellow][Warning][/] {self.__class__.__name__}.{self.diarize.__name__}: HuggingFace token must be provided for diarization model download. Skipping diarization.")
             return transcription_result
 
         audio = self.load_audio(audio)
@@ -210,24 +217,25 @@ class WhisperXTranscriber:
         return diarized_result
 
 
-class PwcppTranscriber(WhisperXTranscriber):
-    def __init__(self,
-                 whisper_model_name="large-v2",
-                 vad_model=None,
-                 vad_method="silero",
-                 device="auto",
-                 num_workers=0,
-                 batch_size=4,
-                 compute_type="auto",
-                 language_code=None,
-                 print_progress=True,
-                 combined_progress=False,
-                 hf_token=None,
-                 min_speakers=None,
-                 max_speakers=None,
-                 delete_used_models=True
-                 ) -> None:
-        pass
-        # vad 호출(위에서 정한대로)
-        # pwcpp 호출. ov 버전도 이제 통합됨
-        # 추후 pwcpp 관련 초기화 코드 추가 가능
+"""설치가 어렵기도 하고, 현재는 메리트가 없으므로 제거"""
+# class PwcppTranscriber(WhisperXTranscriber):
+# def __init__(self,
+#  whisper_model_name="large-v2",
+#  vad_model=None,
+#  vad_method="silero",
+#  device="auto",
+#  num_workers=0,
+#  batch_size=4,
+#  compute_type="auto",
+#  language_code=None,
+#  print_progress=True,
+#  combined_progress=False,
+#  hf_token=None,
+#  min_speakers=None,
+#  max_speakers=None,
+#  delete_used_models=True
+#  ) -> None:
+# pass
+# vad 호출(위에서 정한대로)
+# pwcpp 호출. ov 버전도 이제 통합됨
+# 추후 pwcpp 관련 초기화 코드 추가 가능

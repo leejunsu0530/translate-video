@@ -23,6 +23,7 @@ classifiers = [
 dependencies = [ # paddlepaddle, torch는 별도 설치
     "whisperx @ git+https://github.com/m-bain/whisperX",
     "deep-translator",
+    "rich",
     # "transformers",
     # "opencv-python",
     # "paddleocr",
@@ -36,7 +37,7 @@ pwcpp = ["pywhisercpp"]
 dev = ["pip-licenses"]
 
 [project.scripts]
-tr-video = "translatevideo.__main__:main" # 모듈경로:함수이름 구조
+tr-video = "translatevideo:main" # 모듈경로:함수이름 구조
 
 [project.urls]
 Homepage = "https://github.com/leejunsu0530/translate-video"
