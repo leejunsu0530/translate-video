@@ -25,15 +25,16 @@ from translatevideo.utils.type_hints import WhisperModels
 
 class WhisperXTranscriber:
     def __init__(self,
-                 whisper_model_name: WhisperModels = "large-v2",
+                 whisper_model_name: WhisperModels = "medium",
+                 chunk_audio_minutes: Optional[float] = None,
+                 language_code: LanguageCodes | None = None,
+                 compute_type: Literal['default', 'auto', 'int8', 'int8_float32', 'int8_float16',
+                                       'int8_bfloat16', 'int16', 'float16', 'float32', 'bfloat16'] = "auto",                 
+                 device: Literal["cpu", "cuda", "xpu"] = "cpu",
+                 batch_size: int = 4,
+                 num_workers: int = 0,
                  vad_model: Optional[Vad] = None,
                  vad_method: Literal["pyannote", "silero"] = "silero",
-                 device: Literal["cpu", "cuda", "xpu"] = "cpu",
-                 num_workers: int = 0,
-                 batch_size: int = 4,
-                 compute_type: Literal['default', 'auto', 'int8', 'int8_float32', 'int8_float16',
-                                       'int8_bfloat16', 'int16', 'float16', 'float32', 'bfloat16'] = "auto",
-                 language_code: LanguageCodes | None = None,
                  print_progress: bool = True,
                  combined_progress: bool = False,
                  hf_token: Optional[str] = None,
@@ -46,17 +47,14 @@ class WhisperXTranscriber:
 
         Args:
             whisper_model_name: Size of the model to use (tiny, tiny.en, base, base.en, small, small.en, distil-small.en, medium, medium.en, distil-medium.en, large-v1,large-v2, large-v3, large, distil-large-v2, distil-large-v3, large-v3-turbo, or turbo)
+            chunk_audio_minutes: If provided, audio will be chunked into segments of the given length (in minutes) for transcription to reduce memory usage. If None, the entire audio will be processed at once.
+            language_code: language code for **transcribe** and **align** method. If None, language will be detected automatically.
+            compute_type: change to "int8" if low on GPU mem (may reduce accuracy). When using cpu, default, auto, float32, int8, int8_float32 would be appropriate
+            device: device to run the model on (cpu, cuda, xpu). "auto" is not supported here. "xpu" is not tested yet.
+            batch_size: number of batches for **transcript** method. reduce if low on GPU mem
+            num_workers: number of workers for **transcript** method. **Can't be used at windows and it will automatically be 0.**
             vad_model: The vad model to manually assign.
             vad_method: The vad method to use. vad_model has a higher priority if it is not None. **currently, torch higher than 2.6 causes error with pyannote vad, so please use silero vad instead**
-            device: device to run the model on (cpu, cuda, xpu). "auto" is not supported here. "xpu" is not tested yet.
-            num_workers: number of workers for **transcript** method. **Can't be used at windows and it will automatically be 0.**
-            batch_size: number of batches for **transcript** method. reduce if low on GPU mem
-            compute_type:
-                change to "int8" if low on GPU mem (may reduce accuracy)
-                - default: keep the same quantization that was used during model conversion
-                - auto: use the fastest computation type that is supported on this system and device
-                for **cpu**, default, auto, float32, int8, int8_float32 would be appropriate
-            language_code: language code for **transcribe** and **align** method. If None, language will be detected automatically.
             print_progress: Whether to print progress through whisperx at **transcribe** and **align** method.
             combined_progress: Whether to use combined progress.
             hf_token: HuggingFace authentication token for **diarization** model download.
@@ -64,21 +62,6 @@ class WhisperXTranscriber:
             max_speakers: Maximum number of speakers for **diarize** method. Add it if known.
             delete_used_models: Whether to delete models after use to free up memory.
             """
-        self.device = device
-        if platform.system() == "Windows" and num_workers != 0:
-            print(
-                f"[yellow][Warning][/] {self.__class__.__name__}.{self.__class__.__init__.__name__}: num_workers can't be used at Windows OS. Setting num_workers to 0.")
-            self.num_workers = 0
-        else:
-            self.num_workers = num_workers
-        self.batch_size = batch_size
-        self.language_code = language_code
-        self.print_progress = print_progress
-        self.combined_progress = combined_progress
-        self.hf_token = hf_token
-        self.min_speakers = min_speakers
-        self.max_speakers = max_speakers
-        self.delete_used_models = delete_used_models
         # with torch.serialization.safe_globals([ListConfig]): # num workers 0이면 상관 x
         self.model = whisperx.load_model(whisper_model_name,
                                          device,
@@ -86,6 +69,23 @@ class WhisperXTranscriber:
                                          language=language_code,
                                          vad_model=vad_model,
                                          vad_method=vad_method)
+        self.language_code = language_code
+        self.chunk_audio_minutes = chunk_audio_minutes
+        self.device = device
+        self.batch_size = batch_size
+        if platform.system() == "Windows" and num_workers != 0:
+            print(
+                f"[yellow][Warning][/] {self.__class__.__name__}.{self.__class__.__init__.__name__}: num_workers can't be used at Windows OS. Setting num_workers to 0.")
+            self.num_workers = 0
+        else:
+            self.num_workers = num_workers
+        self.print_progress = print_progress
+        self.combined_progress = combined_progress
+        self.hf_token = hf_token
+        self.min_speakers = min_speakers
+        self.max_speakers = max_speakers
+        self.delete_used_models = delete_used_models
+        
 
     def delete_model(self, model: Any) -> None:
         if self.delete_used_models:
@@ -93,15 +93,15 @@ class WhisperXTranscriber:
             gc.collect()
             torch.cuda.empty_cache()
 
-    def auto_transcribe(self, audio_file: str | Path, use_diarization: bool = True) -> tuple[TranscriptionResult, LanguageNames]:
+    def auto_transcribe(self, audio_file: str | Path|ndarray, use_diarization: bool = True) -> tuple[TranscriptionResult, LanguageNames]:
         """
         Because whisperx itself preprocesses audio file, any type of audio file can be given.
         """
-        audio = whisperx.load_audio(str(audio_file))
+        audio = self.load_audio(audio_file)
         # 1. Transcribe with whisper
         print("[green][Info][/] Starting transcription...")
         result = self.transcribe(audio)
-        language_name = self.load_language_name(result)
+        language_name = self.return_language_name(result)
 
         # 2. Align whisper output
         print("[green][Info][/] Starting alignment...")
@@ -114,7 +114,7 @@ class WhisperXTranscriber:
 
         return result, language_name
 
-    def load_language_name(self, transciption_result: TranscriptionResult) -> LanguageNames:
+    def return_language_name(self, transciption_result: TranscriptionResult) -> LanguageNames:
         """
         load language name from language code
         """
