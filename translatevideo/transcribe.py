@@ -29,7 +29,7 @@ class WhisperXTranscriber:
                  chunk_audio_minutes: Optional[float] = None,
                  language_code: LanguageCodes | None = None,
                  compute_type: Literal['default', 'auto', 'int8', 'int8_float32', 'int8_float16',
-                                       'int8_bfloat16', 'int16', 'float16', 'float32', 'bfloat16'] = "auto",                 
+                                       'int8_bfloat16', 'int16', 'float16', 'float32', 'bfloat16'] = "auto",
                  device: Literal["cpu", "cuda", "xpu"] = "cpu",
                  batch_size: int = 4,
                  num_workers: int = 0,
@@ -85,18 +85,20 @@ class WhisperXTranscriber:
         self.min_speakers = min_speakers
         self.max_speakers = max_speakers
         self.delete_used_models = delete_used_models
-        
 
-    def delete_model(self, model: Any) -> None:
+    def _delete_model(self, model: Any) -> None:
         if self.delete_used_models:
             del model
             gc.collect()
             torch.cuda.empty_cache()
 
-    def auto_transcribe(self, audio_file: str | Path|ndarray, use_diarization: bool = True) -> tuple[TranscriptionResult, LanguageNames]:
+    def auto_transcribe(self, audio_file: str | Path, use_diarization: bool = True) -> tuple[TranscriptionResult, LanguageNames]:
         """
+        Automatically chunks audio, transcribes, aligns, and diarizes (if specified) the given audio file.
         Because whisperx itself preprocesses audio file, any type of audio file can be given.
         """
+        # 오디오 청킹 및 제너레이터 순회를 여기서 담당. 아래 함수들은 그대로 유지
+        # 아래 전체에 for 문 씌움(오디오를 그냥 다 청킹해서 들고오면 메모리상으로 다를바가 없을거임 아마)
         audio = self.load_audio(audio_file)
         # 1. Transcribe with whisper
         print("[green][Info][/] Starting transcription...")
@@ -113,13 +115,6 @@ class WhisperXTranscriber:
             result = self.diarize(audio, result)
 
         return result, language_name
-
-    def return_language_name(self, transciption_result: TranscriptionResult) -> LanguageNames:
-        """
-        load language name from language code
-        """
-        language_code = transciption_result["language"] or self.language_code
-        return LANGUAGES[language_code]
 
     def load_audio(self, audio_file: str | Path | ndarray) -> ndarray:
         """
@@ -149,7 +144,7 @@ class WhisperXTranscriber:
             **additional_args
         )
 
-        self.delete_model(self.model)
+        self._delete_model(self.model)
         return result
 
     def align(self,
@@ -177,7 +172,7 @@ class WhisperXTranscriber:
             **additional_args
         )
 
-        self.delete_model(model_a)
+        self._delete_model(model_a)
         return aligned_result
 
     def diarize(self,
@@ -213,8 +208,15 @@ class WhisperXTranscriber:
             **additional_args
         )
 
-        self.delete_model(diarize_model)
+        self._delete_model(diarize_model)
         return diarized_result
+
+    def return_language_name(self, transciption_result: TranscriptionResult) -> LanguageNames:
+        """
+        load language name from language code
+        """
+        language_code = transciption_result["language"] or self.language_code
+        return LANGUAGES[language_code]
 
 
 """설치가 어렵기도 하고, 현재는 메리트가 없으므로 제거"""
