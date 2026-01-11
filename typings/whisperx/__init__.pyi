@@ -6,6 +6,7 @@ from whisperx.asr import FasterWhisperPipeline, WhisperModel  # type: ignore
 from whisperx.vads.vad import Vad  # type: ignore
 import numpy as np
 import pandas as pd
+import logging
 
 
 class AlignMetadata(TypedDict):
@@ -67,7 +68,7 @@ def load_model(whisper_arch: str,
         download_root: The root directory to download the model to.
         local_files_only: If `True`, avoid downloading the file and return the path to the local cached file if it exists.
         threads: The number of cpu threads to use per worker, e.g. will be multiplied by num workers.
-    
+
     Returns:
         A Whisper pipeline.
     """
@@ -112,5 +113,31 @@ def assign_word_speakers(diarize_df: pd.DataFrame,
 
     Returns:
         Updated transcript_result with speaker assignments and optionally embeddings
+    """
+    ...
+
+
+def setup_logging(level: str = ...,
+                  log_file: Optional[str] = ...
+                  ) -> None:
+    """
+    Configure logging for WhisperX.
+
+    Args:
+        level: Logging level (debug, info, warning, error, critical). Default: warning
+        log_file: Optional path to log file. If None, logs only to console.
+    """
+    ...
+
+
+def get_logger(name: str) -> logging.Logger:
+    """
+    Get a logger instance for the given module.
+
+    Args:
+        name: Logger name (typically __name__ from calling module)
+
+    Returns:
+        Logger instance configured with WhisperX settings
     """
     ...
