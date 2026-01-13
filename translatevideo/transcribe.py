@@ -1,5 +1,5 @@
 """
-part of the code is adapted from example code of whisperx
+part of the code is adapted from of whisperx
 TODO:
 - 오디오가 길 경우 메모리 관리를 위해 쪼개서 처리
 - 불러오기 함수에 모델 이름 지정 기능 등 있는데 그거 활용할 수 있게 하기
@@ -9,14 +9,17 @@ import whisperx  # type: ignore
 import gc
 import torch
 import platform
+import subprocess
 from whisperx.vads import Vad   # type: ignore
-from whisperx.diarize import DiarizationPipeline  # type: ignore
 from whisperx.schema import AlignedTranscriptionResult, TranscriptionResult  # type: ignore
 from whisperx.utils import LANGUAGES  # type: ignore
 from typing import Literal, Optional, Any
 from pathlib import Path
-from numpy import ndarray
+import numpy as np
 from rich import print
+
+from whisperx.diarize import DiarizationPipeline  # type: ignore
+
 
 from translatevideo.utils.type_hints import LanguageNames
 from translatevideo.utils.type_hints import LanguageCodes
@@ -40,7 +43,8 @@ class WhisperXTranscriber:
                  hf_token: Optional[str] = None,
                  min_speakers: Optional[int] = None,
                  max_speakers: Optional[int] = None,
-                 delete_used_models: bool = True
+                 num_speakers: Optional[int] = None,
+                 #  delete_used_models: bool = True
                  ) -> None:
         """
         Some part of this code is adapted from github of whisperx
@@ -60,18 +64,21 @@ class WhisperXTranscriber:
             hf_token: HuggingFace authentication token for **diarization** model download.
             min_speakers: Minimum number of speakers for **diarize** method. Add it if known.
             max_speakers: Maximum number of speakers for **diarize** method. Add it if known.
-            delete_used_models: Whether to delete models after use to free up memory.
+            num_speakers: Number of speakers for **diarize** method. Add it if known.
+
             """
         # with torch.serialization.safe_globals([ListConfig]): # num workers 0이면 상관 x
-        self.model = whisperx.load_model(whisper_model_name,
-                                         device,
-                                         compute_type=compute_type,
-                                         language=language_code,
-                                         vad_model=vad_model,
-                                         vad_method=vad_method)
+        self._asr_model = None
+        self._align_model_and_metadeta = None
+        self._diarize_model = None
+
+        self.whisper_model_name = whisper_model_name
+        self.device = device
+        self.compute_type = compute_type
+        self.vad_model = vad_model
+        self.vad_method = vad_method
         self.language_code = language_code
         self.chunk_audio_minutes = chunk_audio_minutes
-        self.device = device
         self.batch_size = batch_size
         if platform.system() == "Windows" and num_workers != 0:
             print(
@@ -84,13 +91,66 @@ class WhisperXTranscriber:
         self.hf_token = hf_token
         self.min_speakers = min_speakers
         self.max_speakers = max_speakers
-        self.delete_used_models = delete_used_models
+        self.num_speakers = num_speakers
+        # self.delete_used_models = delete_used_models
 
-    def _delete_model(self, model: Any) -> None:
-        if self.delete_used_models:
-            del model
-            gc.collect()
-            torch.cuda.empty_cache()
+    @property
+    def asr_model(self):
+        """lazy import of asr model."""
+        if self._asr_model is None:
+            self._asr_model = whisperx.load_model(
+                self.whisper_model_name,
+                self.device,
+                compute_type=self.compute_type,
+                language=self.language_code,
+                vad_model=self.vad_model,
+                vad_method=self.vad_method
+            )
+        return self._asr_model
+
+    @property
+    def align_model_tuple(self):
+        """
+        lazy import of align model and metadata of it.
+        language_code가 없다는 문제는 아래 align을 실행할 때 위 줄에서 지정하기 때문에 상관 없음
+        """
+        if self.language_code is None:
+            raise ValueError(
+                f"{self.__class__.__name__}.language_code must be setted before calling align model.")
+        if self._align_model_and_metadeta is None:
+            self._align_model_and_metadeta = whisperx.load_align_model(
+                self.language_code,
+                self.device,
+            )
+        return self._align_model_and_metadeta
+
+    @property
+    def diarize_model(self):
+        """lazy import of diarize model."""
+        if self._diarize_model is None:
+            from whisperx.diarize import DiarizationPipeline  # type: ignore
+            self._diarize_model = DiarizationPipeline(
+                use_auth_token=self.hf_token, device=self.device
+            )
+        return self._diarize_model
+
+    def _delete_object(self, object_: Any) -> None:
+        # if self.delete_used_models:
+        if object_:
+            del object_
+        gc.collect()
+        torch.cuda.empty_cache()
+
+    def delete_model(self, model: Literal["asr_model", "align_model", "diarize_model"]) -> None:
+        if model == "asr_model":
+            self._asr_model = None
+        elif model == "align_model":
+            self._align_model_and_metadeta = None
+        elif model == "diarize_model":
+            self._diarize_model = None
+
+        gc.collect()
+        torch.cuda.empty_cache()
 
     def auto_transcribe(self, audio_file: str | Path, use_diarization: bool = True) -> tuple[TranscriptionResult, LanguageNames]:
         """
@@ -116,73 +176,111 @@ class WhisperXTranscriber:
 
         return result, language_name
 
-    def load_audio(self, audio_file: str | Path | ndarray) -> ndarray:
+    def load_audio(self, audio_file: str | Path | np.ndarray,
+                   start: Optional[float] = None,
+                   duration: Optional[float] = None,
+                   sr: int = 16000) -> np.ndarray:
         """
-        load audio file into ndarray
+        part of the code is adapted from of whisperx
         """
-        if isinstance(audio_file, (str, Path)):
-            audio = whisperx.load_audio(str(audio_file))
-        else:
-            audio = audio_file
-        return audio
+        if isinstance(audio_file, np.ndarray):
+            return audio_file
 
-    def transcribe(self, audio_file: str | Path | ndarray, additional_args: Optional[dict] = None) -> TranscriptionResult:
+        try:
+            # Launches a subprocess to decode audio while down-mixing and resampling as necessary.
+            # Requires the ffmpeg CLI to be installed.
+            cmd = [
+                "ffmpeg",
+                "-nostdin",
+                "-threads",
+                "0"]
+            if start is not None and duration is not None:
+                cmd += ["-ss", str(start), "-t", str(duration)]
+            cmd += ["-i",
+                    str(audio_file),
+                    "-f",
+                    "s16le",
+                    "-ac",
+                    "1",
+                    "-acodec",
+                    "pcm_s16le",
+                    "-ar",
+                    str(sr),
+                    "-",
+                    ]
+
+            out = subprocess.run(cmd, capture_output=True, check=True).stdout
+        except subprocess.CalledProcessError as e:
+            raise RuntimeError(
+                f"Failed to load audio: {e.stderr.decode()}") from e
+
+        return np.frombuffer(out, np.int16).flatten().astype(np.float32) / 32768.0
+
+    def transcribe(self, audio_file: str | Path | np.ndarray,
+                   #    additional_args: Optional[dict] = None
+                   ) -> TranscriptionResult:
         """
-        you can also use this function by itself if you don't need alignment and diarization
+        you can also use this function by itself if you don't need alignment and diarization.
+        To lower memory use, please use 'delete_model' method after using this method.
         """
         audio = self.load_audio(audio_file)
-        if additional_args is None:
-            additional_args = {}
+        # if additional_args is None:
+        # additional_args = {}
 
-        result = self.model.transcribe(
+        result = self.asr_model.transcribe(
             audio,
             batch_size=self.batch_size,
             num_workers=self.num_workers,
             # language=self.language_code,
             print_progress=self.print_progress,
             combined_progress=self.combined_progress,
-            **additional_args
+            # **additional_args
         )
 
-        self._delete_model(self.model)
+        # self.delete_object(self.asr_model)
         return result
 
     def align(self,
               transcription_result: TranscriptionResult,
-              audio: str | Path | ndarray,
-              additional_args: Optional[dict] = None,
+              audio: str | Path | np.ndarray,
+              #   additional_args: Optional[dict] = None,
               ) -> AlignedTranscriptionResult:
         """
         you can also use this function by itself if you have transcription result and don't need diarization.
+        To lower memory use, please use 'delete_model' method after using this method.
         """
         audio = self.load_audio(audio)
-        if additional_args is None:
-            additional_args = {}
+        # if additional_args is None:
+        # additional_args = {}
 
-        language_code = transcription_result["language"] or self.language_code
+        # language_code = transcription_result["language"] or self.language_code
+        if self.language_code is None:
+            print(
+                "[green][Info][/] No default language code was set. Using detected language from transcription.")
+            self.language_code = transcription_result["language"]
 
-        model_a, metadata = whisperx.load_align_model(
-            language_code=language_code, device=self.device)
         aligned_result = whisperx.align(
-            transcription_result["segments"], model_a, metadata,
+            transcription_result["segments"],
+            *self.align_model_tuple,
             audio, self.device,
             return_char_alignments=False,
             print_progress=self.print_progress,
             combined_progress=self.combined_progress,
-            **additional_args
+            # **additional_args
         )
 
-        self._delete_model(model_a)
+        # self.delete_object(model_a)
         return aligned_result
 
     def diarize(self,
-                audio: str | Path | ndarray,
+                audio: str | Path | np.ndarray,
                 transcription_result: TranscriptionResult | AlignedTranscriptionResult,
-                additional_args: Optional[dict] = None
+                # additional_args: Optional[dict] = None
                 ) -> AlignedTranscriptionResult | TranscriptionResult:
         """
         you can also use this function by itself if you have transcription result.
         **if hf_token is not provided, diarization will be skipped.**
+        To lower memory use, please use 'delete_model' method after using this method.
         """
         if self.hf_token is None:
             print(
@@ -190,25 +288,25 @@ class WhisperXTranscriber:
             return transcription_result
 
         audio = self.load_audio(audio)
-        if additional_args is None:
-            additional_args = {}
+        # if additional_args is None:
+        # additional_args = {}
 
-        diarize_model = DiarizationPipeline(
-            use_auth_token=self.hf_token, device=self.device)
+        diarize_model = self.diarize_model
 
-        diarize_segments = diarize_model(audio)
-        diarize_model(audio,
-                      min_speakers=self.min_speakers,
-                      max_speakers=self.max_speakers
-                      )
+        diarize_segments = diarize_model(
+            audio,
+            num_speakers=self.num_speakers
+            min_speakers=self.min_speakers,
+            max_speakers=self.max_speakers
+        )
 
         diarized_result = whisperx.assign_word_speakers(
             diarize_segments,
             transcription_result,
-            **additional_args
+            # **additional_args
         )
 
-        self._delete_model(diarize_model)
+        # self.delete_object(diarize_model)
         return diarized_result
 
     def return_language_name(self, transciption_result: TranscriptionResult) -> LanguageNames:
