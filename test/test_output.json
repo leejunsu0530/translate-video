@@ -1,1 +1,246 @@
-({'segments': [{'start': 1.122, 'end': 1.904, 'text': ' I know.', 'words': [{'word': 'I', 'start': np.float64(1.122), 'end': np.float64(1.523), 'score': np.float64(0.75)}, {'word': 'know.', 'start': np.float64(1.543), 'end': np.float64(1.904), 'score': np.float64(0.469)}]}, {'start': 2.164, 'end': 3.447, 'text': 'I know.', 'words': [{'word': 'I', 'start': np.float64(2.164), 'end': np.float64(2.184), 'score': np.float64(0.616)}, {'word': 'know.', 'start': np.float64(2.505), 'end': np.float64(3.447), 'score': np.float64(0.865)}]}, {'start': 3.467, 'end': 3.607, 'text': 'I know.', 'words': [{'word': 'I', 'start': np.float64(3.467), 'end': np.float64(3.487), 'score': np.float64(0.001)}, {'word': 'know.', 'start': np.float64(3.507), 'end': np.float64(3.607), 'score': np.float64(0.385)}]}, {'start': 4.389, 'end': 4.649, 'text': 'I know.', 'words': [{'word': 'I', 'start': np.float64(4.389), 'end': np.float64(4.409), 'score': np.float64(0.239)}, {'word': 'know.', 'start': np.float64(4.429), 'end': np.float64(4.649), 'score': np.float64(0.292)}]}, {'start': 4.669, 'end': 5.371, 'text': 'I know.', 'words': [{'word': 'I', 'start': np.float64(4.669), 'end': np.float64(4.789), 'score': np.float64(0.806)}, {'word': 'know.', 'start': np.float64(4.81), 'end': np.float64(5.371), 'score': np.float64(0.752)}]}, {'start': 5.551, 'end': 6.513, 'text': 'I know.', 'words': [{'word': 'I', 'start': np.float64(5.551), 'end': np.float64(5.631), 'score': np.float64(0.82)}, {'word': 'know.', 'start': np.float64(5.731), 'end': np.float64(6.513), 'score': np.float64(0.593)}]}, {'start': 7.234, 'end': 7.836, 'text': 'I know.', 'words': [{'word': 'I', 'start': np.float64(7.234), 'end': np.float64(7.295), 'score': np.float64(0.64)}, {'word': 'know.', 'start': np.float64(7.315), 'end': np.float64(7.836), 'score': np.float64(0.513)}]}, {'start': 8.116, 'end': 8.637, 'text': 'I know.', 'words': [{'word': 'I', 'start': np.float64(8.116), 'end': np.float64(8.176), 'score': np.float64(0.501)}, {'word': 'know.', 'start': np.float64(8.196), 'end': np.float64(8.637), 'score': np.float64(0.211)}]}, {'start': 8.737, 'end': 8.938, 'text': 'I know.', 'words': [{'word': 'I', 'start': np.float64(8.737), 'end': np.float64(8.758), 'score': np.float64(0.0)}, {'word': 'know.', 'start': np.float64(8.778), 'end': np.float64(8.938), 'score': np.float64(0.399)}]}, {'start': 8.998, 'end': 9.88, 'text': 'I know.', 'words': [{'word': 'I', 'start': np.float64(8.998), 'end': np.float64(9.018), 'score': np.float64(0.985)}, {'word': 'know.', 'start': np.float64(9.178), 'end': np.float64(9.88), 'score': np.float64(0.342)}]}, {'start': 9.92, 'end': 10.18, 'text': 'I know.', 'words': [{'word': 'I', 'start': np.float64(9.92), 'end': np.float64(9.94), 'score': np.float64(0.963)}, {'word': 'know.', 'start': np.float64(10.04), 'end': np.float64(10.18), 'score': np.float64(0.317)}]}, {'start': 10.982, 'end': 11.443, 'text': 'I know.', 'words': [{'word': 'I', 'start': np.float64(10.982), 'end': np.float64(11.002), 'score': np.float64(0.001)}, {'word': 'know.', 'start': np.float64(11.022), 'end': np.float64(11.443), 'score': np.float64(0.33)}]}, {'start': 11.463, 'end': 12.605, 'text': 'I know.', 'words': [{'word': 'I', 'start': np.float64(11.463), 'end': np.float64(11.543), 'score': np.float64(0.901)}, {'word': 'know.', 'start': np.float64(11.643), 'end': np.float64(12.605), 'score': np.float64(0.737)}]}, {'start': 12.806, 'end': 13.547, 'text': 'I know.', 'words': [{'word': 'I', 'start': np.float64(12.806), 'end': np.float64(13.006), 'score': np.float64(0.681)}, {'word': 'know.', 'start': np.float64(13.146), 'end': np.float64(13.547), 'score': np.float64(0.262)}]}, {'start': 13.567, 'end': 14.249, 'text': 'I know.', 'words': [{'word': 'I', 'start': np.float64(13.567), 'end': np.float64(13.647), 'score': np.float64(0.629)}, {'word': 'know.', 'start': np.float64(13.768), 'end': np.float64(14.249), 'score': np.float64(0.546)}]}, {'start': 14.269, 'end': 14.589, 'text': 'I know.', 'words': [{'word': 'I', 'start': np.float64(14.269), 'end': np.float64(14.289), 'score': np.float64(0.988)}, {'word': 'know.', 'start': np.float64(14.309), 'end': np.float64(14.589), 'score': np.float64(0.461)}]}, {'start': 14.87, 'end': 15.07, 'text': 'I know.', 'words': [{'word': 'I', 'start': np.float64(14.87), 'end': np.float64(14.89), 'score': np.float64(0.977)}, {'word': 'know.', 'start': np.float64(14.95), 'end': np.float64(15.07), 'score': np.float64(0.493)}]}, {'start': 15.151, 'end': 15.491, 'text': 'I know.', 'words': [{'word': 'I', 'start': np.float64(15.151), 'end': np.float64(15.171), 'score': np.float64(0.998)}, {'word': 'know.', 'start': np.float64(15.191), 'end': np.float64(15.491), 'score': np.float64(0.593)}]}, {'start': 15.712, 'end': 17.034, 'text': 'I know.', 'words': [{'word': 'I', 'start': np.float64(15.712), 'end': np.float64(15.812), 'score': np.float64(0.857)}, {'word': 'know.', 'start': np.float64(15.872), 'end': np.float64(17.034), 'score': np.float64(0.618)}]}, {'start': 17.215, 'end': 18.838, 'text': 'I know.', 'words': [{'word': 'I', 'start': np.float64(17.215), 'end': np.float64(17.776), 'score': np.float64(0.75)}, {'word': 'know.', 'start': np.float64(18.718), 'end': np.float64(18.838), 'score': np.float64(0.294)}]}, {'start': 19.139, 'end': 19.86, 'text': 'I know.', 'words': [{'word': 'I', 'start': np.float64(19.139), 'end': np.float64(19.259), 'score': np.float64(0.786)}, {'word': 'know.', 'start': np.float64(19.299), 'end': np.float64(19.86), 'score': np.float64(0.669)}]}, {'start': 20.02, 'end': 20.802, 'text': 'I know.', 'words': [{'word': 'I', 'start': np.float64(20.02), 'end': np.float64(20.04), 'score': np.float64(0.927)}, {'word': 'know.', 'start': np.float64(20.461), 'end': np.float64(20.802), 'score': np.float64(0.618)}]}], 'word_segments': [{'word': 'I', 'start': np.float64(1.122), 'end': np.float64(1.523), 'score': np.float64(0.75)}, {'word': 'know.', 'start': np.float64(1.543), 'end': np.float64(1.904), 'score': np.float64(0.469)}, {'word': 'I', 'start': np.float64(2.164), 'end': np.float64(2.184), 'score': np.float64(0.616)}, {'word': 'know.', 'start': np.float64(2.505), 'end': np.float64(3.447), 'score': np.float64(0.865)}, {'word': 'I', 'start': np.float64(3.467), 'end': np.float64(3.487), 'score': np.float64(0.001)}, {'word': 'know.', 'start': np.float64(3.507), 'end': np.float64(3.607), 'score': np.float64(0.385)}, {'word': 'I', 'start': np.float64(4.389), 'end': np.float64(4.409), 'score': np.float64(0.239)}, {'word': 'know.', 'start': np.float64(4.429), 'end': np.float64(4.649), 'score': np.float64(0.292)}, {'word': 'I', 'start': np.float64(4.669), 'end': np.float64(4.789), 'score': np.float64(0.806)}, {'word': 'know.', 'start': np.float64(4.81), 'end': np.float64(5.371), 'score': np.float64(0.752)}, {'word': 'I', 'start': np.float64(5.551), 'end': np.float64(5.631), 'score': np.float64(0.82)}, {'word': 'know.', 'start': np.float64(5.731), 'end': np.float64(6.513), 'score': np.float64(0.593)}, {'word': 'I', 'start': np.float64(7.234), 'end': np.float64(7.295), 'score': np.float64(0.64)}, {'word': 'know.', 'start': np.float64(7.315), 'end': np.float64(7.836), 'score': np.float64(0.513)}, {'word': 'I', 'start': np.float64(8.116), 'end': np.float64(8.176), 'score': np.float64(0.501)}, {'word': 'know.', 'start': np.float64(8.196), 'end': np.float64(8.637), 'score': np.float64(0.211)}, {'word': 'I', 'start': np.float64(8.737), 'end': np.float64(8.758), 'score': np.float64(0.0)}, {'word': 'know.', 'start': np.float64(8.778), 'end': np.float64(8.938), 'score': np.float64(0.399)}, {'word': 'I', 'start': np.float64(8.998), 'end': np.float64(9.018), 'score': np.float64(0.985)}, {'word': 'know.', 'start': np.float64(9.178), 'end': np.float64(9.88), 'score': np.float64(0.342)}, {'word': 'I', 'start': np.float64(9.92), 'end': np.float64(9.94), 'score': np.float64(0.963)}, {'word': 'know.', 'start': np.float64(10.04), 'end': np.float64(10.18), 'score': np.float64(0.317)}, {'word': 'I', 'start': np.float64(10.982), 'end': np.float64(11.002), 'score': np.float64(0.001)}, {'word': 'know.', 'start': np.float64(11.022), 'end': np.float64(11.443), 'score': np.float64(0.33)}, {'word': 'I', 'start': np.float64(11.463), 'end': np.float64(11.543), 'score': np.float64(0.901)}, {'word': 'know.', 'start': np.float64(11.643), 'end': np.float64(12.605), 'score': np.float64(0.737)}, {'word': 'I', 'start': np.float64(12.806), 'end': np.float64(13.006), 'score': np.float64(0.681)}, {'word': 'know.', 'start': np.float64(13.146), 'end': np.float64(13.547), 'score': np.float64(0.262)}, {'word': 'I', 'start': np.float64(13.567), 'end': np.float64(13.647), 'score': np.float64(0.629)}, {'word': 'know.', 'start': np.float64(13.768), 'end': np.float64(14.249), 'score': np.float64(0.546)}, {'word': 'I', 'start': np.float64(14.269), 'end': np.float64(14.289), 'score': np.float64(0.988)}, {'word': 'know.', 'start': np.float64(14.309), 'end': np.float64(14.589), 'score': np.float64(0.461)}, {'word': 'I', 'start': np.float64(14.87), 'end': np.float64(14.89), 'score': np.float64(0.977)}, {'word': 'know.', 'start': np.float64(14.95), 'end': np.float64(15.07), 'score': np.float64(0.493)}, {'word': 'I', 'start': np.float64(15.151), 'end': np.float64(15.171), 'score': np.float64(0.998)}, {'word': 'know.', 'start': np.float64(15.191), 'end': np.float64(15.491), 'score': np.float64(0.593)}, {'word': 'I', 'start': np.float64(15.712), 'end': np.float64(15.812), 'score': np.float64(0.857)}, {'word': 'know.', 'start': np.float64(15.872), 'end': np.float64(17.034), 'score': np.float64(0.618)}, {'word': 'I', 'start': np.float64(17.215), 'end': np.float64(17.776), 'score': np.float64(0.75)}, {'word': 'know.', 'start': np.float64(18.718), 'end': np.float64(18.838), 'score': np.float64(0.294)}, {'word': 'I', 'start': np.float64(19.139), 'end': np.float64(19.259), 'score': np.float64(0.786)}, {'word': 'know.', 'start': np.float64(19.299), 'end': np.float64(19.86), 'score': np.float64(0.669)}, {'word': 'I', 'start': np.float64(20.02), 'end': np.float64(20.04), 'score': np.float64(0.927)}, {'word': 'know.', 'start': np.float64(20.461), 'end': np.float64(20.802), 'score': np.float64(0.618)}]}, 'english')
+({'segments': [
+        {'start': 1.122, 'end': 1.904, 'text': ' I know.', 'words': [
+                {'word': 'I', 'start': np.float64(1.122), 'end': np.float64(1.523), 'score': np.float64(0.75)
+                },
+                {'word': 'know.', 'start': np.float64(1.543), 'end': np.float64(1.904), 'score': np.float64(0.469)
+                }
+            ]
+        },
+        {'start': 2.164, 'end': 3.447, 'text': 'I know.', 'words': [
+                {'word': 'I', 'start': np.float64(2.164), 'end': np.float64(2.184), 'score': np.float64(0.616)
+                },
+                {'word': 'know.', 'start': np.float64(2.505), 'end': np.float64(3.447), 'score': np.float64(0.865)
+                }
+            ]
+        },
+        {'start': 3.467, 'end': 3.607, 'text': 'I know.', 'words': [
+                {'word': 'I', 'start': np.float64(3.467), 'end': np.float64(3.487), 'score': np.float64(0.001)
+                },
+                {'word': 'know.', 'start': np.float64(3.507), 'end': np.float64(3.607), 'score': np.float64(0.385)
+                }
+            ]
+        },
+        {'start': 4.389, 'end': 4.649, 'text': 'I know.', 'words': [
+                {'word': 'I', 'start': np.float64(4.389), 'end': np.float64(4.409), 'score': np.float64(0.239)
+                },
+                {'word': 'know.', 'start': np.float64(4.429), 'end': np.float64(4.649), 'score': np.float64(0.292)
+                }
+            ]
+        },
+        {'start': 4.669, 'end': 5.371, 'text': 'I know.', 'words': [
+                {'word': 'I', 'start': np.float64(4.669), 'end': np.float64(4.789), 'score': np.float64(0.806)
+                },
+                {'word': 'know.', 'start': np.float64(4.81), 'end': np.float64(5.371), 'score': np.float64(0.752)
+                }
+            ]
+        },
+        {'start': 5.551, 'end': 6.513, 'text': 'I know.', 'words': [
+                {'word': 'I', 'start': np.float64(5.551), 'end': np.float64(5.631), 'score': np.float64(0.82)
+                },
+                {'word': 'know.', 'start': np.float64(5.731), 'end': np.float64(6.513), 'score': np.float64(0.593)
+                }
+            ]
+        },
+        {'start': 7.234, 'end': 7.836, 'text': 'I know.', 'words': [
+                {'word': 'I', 'start': np.float64(7.234), 'end': np.float64(7.295), 'score': np.float64(0.64)
+                },
+                {'word': 'know.', 'start': np.float64(7.315), 'end': np.float64(7.836), 'score': np.float64(0.513)
+                }
+            ]
+        },
+        {'start': 8.116, 'end': 8.637, 'text': 'I know.', 'words': [
+                {'word': 'I', 'start': np.float64(8.116), 'end': np.float64(8.176), 'score': np.float64(0.501)
+                },
+                {'word': 'know.', 'start': np.float64(8.196), 'end': np.float64(8.637), 'score': np.float64(0.211)
+                }
+            ]
+        },
+        {'start': 8.737, 'end': 8.938, 'text': 'I know.', 'words': [
+                {'word': 'I', 'start': np.float64(8.737), 'end': np.float64(8.758), 'score': np.float64(0.0)
+                },
+                {'word': 'know.', 'start': np.float64(8.778), 'end': np.float64(8.938), 'score': np.float64(0.399)
+                }
+            ]
+        },
+        {'start': 8.998, 'end': 9.88, 'text': 'I know.', 'words': [
+                {'word': 'I', 'start': np.float64(8.998), 'end': np.float64(9.018), 'score': np.float64(0.985)
+                },
+                {'word': 'know.', 'start': np.float64(9.178), 'end': np.float64(9.88), 'score': np.float64(0.342)
+                }
+            ]
+        },
+        {'start': 9.92, 'end': 10.18, 'text': 'I know.', 'words': [
+                {'word': 'I', 'start': np.float64(9.92), 'end': np.float64(9.94), 'score': np.float64(0.963)
+                },
+                {'word': 'know.', 'start': np.float64(10.04), 'end': np.float64(10.18), 'score': np.float64(0.317)
+                }
+            ]
+        },
+        {'start': 10.982, 'end': 11.443, 'text': 'I know.', 'words': [
+                {'word': 'I', 'start': np.float64(10.982), 'end': np.float64(11.002), 'score': np.float64(0.001)
+                },
+                {'word': 'know.', 'start': np.float64(11.022), 'end': np.float64(11.443), 'score': np.float64(0.33)
+                }
+            ]
+        },
+        {'start': 11.463, 'end': 12.605, 'text': 'I know.', 'words': [
+                {'word': 'I', 'start': np.float64(11.463), 'end': np.float64(11.543), 'score': np.float64(0.901)
+                },
+                {'word': 'know.', 'start': np.float64(11.643), 'end': np.float64(12.605), 'score': np.float64(0.737)
+                }
+            ]
+        },
+        {'start': 12.806, 'end': 13.547, 'text': 'I know.', 'words': [
+                {'word': 'I', 'start': np.float64(12.806), 'end': np.float64(13.006), 'score': np.float64(0.681)
+                },
+                {'word': 'know.', 'start': np.float64(13.146), 'end': np.float64(13.547), 'score': np.float64(0.262)
+                }
+            ]
+        },
+        {'start': 13.567, 'end': 14.249, 'text': 'I know.', 'words': [
+                {'word': 'I', 'start': np.float64(13.567), 'end': np.float64(13.647), 'score': np.float64(0.629)
+                },
+                {'word': 'know.', 'start': np.float64(13.768), 'end': np.float64(14.249), 'score': np.float64(0.546)
+                }
+            ]
+        },
+        {'start': 14.269, 'end': 14.589, 'text': 'I know.', 'words': [
+                {'word': 'I', 'start': np.float64(14.269), 'end': np.float64(14.289), 'score': np.float64(0.988)
+                },
+                {'word': 'know.', 'start': np.float64(14.309), 'end': np.float64(14.589), 'score': np.float64(0.461)
+                }
+            ]
+        },
+        {'start': 14.87, 'end': 15.07, 'text': 'I know.', 'words': [
+                {'word': 'I', 'start': np.float64(14.87), 'end': np.float64(14.89), 'score': np.float64(0.977)
+                },
+                {'word': 'know.', 'start': np.float64(14.95), 'end': np.float64(15.07), 'score': np.float64(0.493)
+                }
+            ]
+        },
+        {'start': 15.151, 'end': 15.491, 'text': 'I know.', 'words': [
+                {'word': 'I', 'start': np.float64(15.151), 'end': np.float64(15.171), 'score': np.float64(0.998)
+                },
+                {'word': 'know.', 'start': np.float64(15.191), 'end': np.float64(15.491), 'score': np.float64(0.593)
+                }
+            ]
+        },
+        {'start': 15.712, 'end': 17.034, 'text': 'I know.', 'words': [
+                {'word': 'I', 'start': np.float64(15.712), 'end': np.float64(15.812), 'score': np.float64(0.857)
+                },
+                {'word': 'know.', 'start': np.float64(15.872), 'end': np.float64(17.034), 'score': np.float64(0.618)
+                }
+            ]
+        },
+        {'start': 17.215, 'end': 18.838, 'text': 'I know.', 'words': [
+                {'word': 'I', 'start': np.float64(17.215), 'end': np.float64(17.776), 'score': np.float64(0.75)
+                },
+                {'word': 'know.', 'start': np.float64(18.718), 'end': np.float64(18.838), 'score': np.float64(0.294)
+                }
+            ]
+        },
+        {'start': 19.139, 'end': 19.86, 'text': 'I know.', 'words': [
+                {'word': 'I', 'start': np.float64(19.139), 'end': np.float64(19.259), 'score': np.float64(0.786)
+                },
+                {'word': 'know.', 'start': np.float64(19.299), 'end': np.float64(19.86), 'score': np.float64(0.669)
+                }
+            ]
+        },
+        {'start': 20.02, 'end': 20.802, 'text': 'I know.', 'words': [
+                {'word': 'I', 'start': np.float64(20.02), 'end': np.float64(20.04), 'score': np.float64(0.927)
+                },
+                {'word': 'know.', 'start': np.float64(20.461), 'end': np.float64(20.802), 'score': np.float64(0.618)
+                }
+            ]
+        }
+    ], 'word_segments': [
+        {'word': 'I', 'start': np.float64(1.122), 'end': np.float64(1.523), 'score': np.float64(0.75)
+        },
+        {'word': 'know.', 'start': np.float64(1.543), 'end': np.float64(1.904), 'score': np.float64(0.469)
+        },
+        {'word': 'I', 'start': np.float64(2.164), 'end': np.float64(2.184), 'score': np.float64(0.616)
+        },
+        {'word': 'know.', 'start': np.float64(2.505), 'end': np.float64(3.447), 'score': np.float64(0.865)
+        },
+        {'word': 'I', 'start': np.float64(3.467), 'end': np.float64(3.487), 'score': np.float64(0.001)
+        },
+        {'word': 'know.', 'start': np.float64(3.507), 'end': np.float64(3.607), 'score': np.float64(0.385)
+        },
+        {'word': 'I', 'start': np.float64(4.389), 'end': np.float64(4.409), 'score': np.float64(0.239)
+        },
+        {'word': 'know.', 'start': np.float64(4.429), 'end': np.float64(4.649), 'score': np.float64(0.292)
+        },
+        {'word': 'I', 'start': np.float64(4.669), 'end': np.float64(4.789), 'score': np.float64(0.806)
+        },
+        {'word': 'know.', 'start': np.float64(4.81), 'end': np.float64(5.371), 'score': np.float64(0.752)
+        },
+        {'word': 'I', 'start': np.float64(5.551), 'end': np.float64(5.631), 'score': np.float64(0.82)
+        },
+        {'word': 'know.', 'start': np.float64(5.731), 'end': np.float64(6.513), 'score': np.float64(0.593)
+        },
+        {'word': 'I', 'start': np.float64(7.234), 'end': np.float64(7.295), 'score': np.float64(0.64)
+        },
+        {'word': 'know.', 'start': np.float64(7.315), 'end': np.float64(7.836), 'score': np.float64(0.513)
+        },
+        {'word': 'I', 'start': np.float64(8.116), 'end': np.float64(8.176), 'score': np.float64(0.501)
+        },
+        {'word': 'know.', 'start': np.float64(8.196), 'end': np.float64(8.637), 'score': np.float64(0.211)
+        },
+        {'word': 'I', 'start': np.float64(8.737), 'end': np.float64(8.758), 'score': np.float64(0.0)
+        },
+        {'word': 'know.', 'start': np.float64(8.778), 'end': np.float64(8.938), 'score': np.float64(0.399)
+        },
+        {'word': 'I', 'start': np.float64(8.998), 'end': np.float64(9.018), 'score': np.float64(0.985)
+        },
+        {'word': 'know.', 'start': np.float64(9.178), 'end': np.float64(9.88), 'score': np.float64(0.342)
+        },
+        {'word': 'I', 'start': np.float64(9.92), 'end': np.float64(9.94), 'score': np.float64(0.963)
+        },
+        {'word': 'know.', 'start': np.float64(10.04), 'end': np.float64(10.18), 'score': np.float64(0.317)
+        },
+        {'word': 'I', 'start': np.float64(10.982), 'end': np.float64(11.002), 'score': np.float64(0.001)
+        },
+        {'word': 'know.', 'start': np.float64(11.022), 'end': np.float64(11.443), 'score': np.float64(0.33)
+        },
+        {'word': 'I', 'start': np.float64(11.463), 'end': np.float64(11.543), 'score': np.float64(0.901)
+        },
+        {'word': 'know.', 'start': np.float64(11.643), 'end': np.float64(12.605), 'score': np.float64(0.737)
+        },
+        {'word': 'I', 'start': np.float64(12.806), 'end': np.float64(13.006), 'score': np.float64(0.681)
+        },
+        {'word': 'know.', 'start': np.float64(13.146), 'end': np.float64(13.547), 'score': np.float64(0.262)
+        },
+        {'word': 'I', 'start': np.float64(13.567), 'end': np.float64(13.647), 'score': np.float64(0.629)
+        },
+        {'word': 'know.', 'start': np.float64(13.768), 'end': np.float64(14.249), 'score': np.float64(0.546)
+        },
+        {'word': 'I', 'start': np.float64(14.269), 'end': np.float64(14.289), 'score': np.float64(0.988)
+        },
+        {'word': 'know.', 'start': np.float64(14.309), 'end': np.float64(14.589), 'score': np.float64(0.461)
+        },
+        {'word': 'I', 'start': np.float64(14.87), 'end': np.float64(14.89), 'score': np.float64(0.977)
+        },
+        {'word': 'know.', 'start': np.float64(14.95), 'end': np.float64(15.07), 'score': np.float64(0.493)
+        },
+        {'word': 'I', 'start': np.float64(15.151), 'end': np.float64(15.171), 'score': np.float64(0.998)
+        },
+        {'word': 'know.', 'start': np.float64(15.191), 'end': np.float64(15.491), 'score': np.float64(0.593)
+        },
+        {'word': 'I', 'start': np.float64(15.712), 'end': np.float64(15.812), 'score': np.float64(0.857)
+        },
+        {'word': 'know.', 'start': np.float64(15.872), 'end': np.float64(17.034), 'score': np.float64(0.618)
+        },
+        {'word': 'I', 'start': np.float64(17.215), 'end': np.float64(17.776), 'score': np.float64(0.75)
+        },
+        {'word': 'know.', 'start': np.float64(18.718), 'end': np.float64(18.838), 'score': np.float64(0.294)
+        },
+        {'word': 'I', 'start': np.float64(19.139), 'end': np.float64(19.259), 'score': np.float64(0.786)
+        },
+        {'word': 'know.', 'start': np.float64(19.299), 'end': np.float64(19.86), 'score': np.float64(0.669)
+        },
+        {'word': 'I', 'start': np.float64(20.02), 'end': np.float64(20.04), 'score': np.float64(0.927)
+        },
+        {'word': 'know.', 'start': np.float64(20.461), 'end': np.float64(20.802), 'score': np.float64(0.618)
+        }
+    ]
+}, 'english')

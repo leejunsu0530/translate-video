@@ -2,6 +2,9 @@
 part of the code is adapted from of whisperx
 TODO:
 - 오디오가 길 경우 메모리 관리를 위해 쪼개서 처리
+- 전사 결과를 파일로 기록하고 중단시 불러옴. 전부 완성되면 다음 처리 단계로
+- 자막 제작(init, main, SubtitleProcessor, utils, transcribe 파일 참조) 
+- 나중에 logging 모듈로 출력 변경
 - 불러오기 함수에 모델 이름 지정 기능 등 있는데 그거 활용할 수 있게 하기
 - 나중에 다중상속 고려한 설계
 """
@@ -18,7 +21,7 @@ from pathlib import Path
 import numpy as np
 from rich import print
 
-from whisperx.diarize import DiarizationPipeline  # type: ignore
+# from whisperx.diarize import DiarizationPipeline  # type: ignore
 
 
 from translatevideo.utils.type_hints import LanguageNames
@@ -39,7 +42,7 @@ class WhisperXTranscriber:
                  vad_model: Optional[Vad] = None,
                  vad_method: Literal["pyannote", "silero"] = "silero",
                  print_progress: bool = True,
-                 combined_progress: bool = False,
+                 combined_progress: bool = True,
                  hf_token: Optional[str] = None,
                  min_speakers: Optional[int] = None,
                  max_speakers: Optional[int] = None,
@@ -78,7 +81,11 @@ class WhisperXTranscriber:
         self.vad_model = vad_model
         self.vad_method = vad_method
         self.language_code = language_code
-        self.chunk_audio_minutes = chunk_audio_minutes
+        if chunk_audio_minutes is not None and chunk_audio_minutes <= 0:
+            raise ValueError(
+                f"{self.__class__.__name__}.chunk_audio_minutes must be positive value or None.")
+        else:
+            self.chunk_audio_minutes = chunk_audio_minutes
         self.batch_size = batch_size
         if platform.system() == "Windows" and num_workers != 0:
             print(
@@ -143,38 +150,66 @@ class WhisperXTranscriber:
 
     def delete_model(self, model: Literal["asr_model", "align_model", "diarize_model"]) -> None:
         if model == "asr_model":
+            self._delete_object(self._asr_model)
             self._asr_model = None
         elif model == "align_model":
+            self._delete_object(self._align_model_and_metadeta)
             self._align_model_and_metadeta = None
         elif model == "diarize_model":
+            self._delete_object(self._diarize_model)
             self._diarize_model = None
-
-        gc.collect()
-        torch.cuda.empty_cache()
 
     def auto_transcribe(self, audio_file: str | Path, use_diarization: bool = True) -> tuple[TranscriptionResult, LanguageNames]:
         """
         Automatically chunks audio, transcribes, aligns, and diarizes (if specified) the given audio file.
         Because whisperx itself preprocesses audio file, any type of audio file can be given.
         """
-        # 오디오 청킹 및 제너레이터 순회를 여기서 담당. 아래 함수들은 그대로 유지
-        # 아래 전체에 for 문 씌움(오디오를 그냥 다 청킹해서 들고오면 메모리상으로 다를바가 없을거임 아마)
-        audio = self.load_audio(audio_file)
-        # 1. Transcribe with whisper
-        print("[green][Info][/] Starting transcription...")
-        result = self.transcribe(audio)
-        language_name = self.return_language_name(result)
+        # # 오디오 청킹 및 제너레이터 순회를 여기서 담당. 아래 함수들은 그대로 유지
+        # # 아래 전체에 for 문 씌움(오디오를 그냥 다 청킹해서 들고오면 메모리상으로 다를바가 없을거임 아마)
+        # if self.chunk_audio_minutes is None:
+        #     audio = self.load_audio(audio_file)
+        #     print("[green][Info][/] Starting transcription without chunking...")
+        #     result = self.transcribe(audio)
+        #     language_name = self.return_language_name(result)
+        #     print("[green][Info][/] Starting alignment...")
+        #     result = self.align(result, audio)
+        #     if use_diarization:
+        #         print("[green][Info][/] Starting diarization...")
+        #         result = self.diarize(audio, result)
+        #     return result, language_name
+        # ---------------------------
+    # 스트리밍 청크 전사
+    # ---------------------------
+        all_segments = []
+        detected_language = None
 
-        # 2. Align whisper output
-        print("[green][Info][/] Starting alignment...")
-        result = self.align(result, audio)
+        for seg, lang in self._chunk_transcription_generator(audio_file):
+            all_segments.append(seg)
+            detected_language = lang
 
-        # 3. Assign speaker labels
+        merged_result = {
+            "segments": all_segments,
+            "language": detected_language,
+        }
+
+        language_name = LANGUAGES[detected_language]
+
+        # ---------------------------
+        # 전체 정렬
+        # ---------------------------
+        print("[green][Info][/] Running global alignment...")
+        full_audio = self.load_audio(audio_file)
+        aligned = self.align(merged_result, full_audio)
+
+        # ---------------------------
+        # 전체 화자 분리
+        # ---------------------------
         if use_diarization:
-            print("[green][Info][/] Starting diarization...")
-            result = self.diarize(audio, result)
+            print("[green][Info][/] Running global diarization...")
+            aligned = self.diarize(full_audio, aligned)
 
-        return result, language_name
+        return aligned, language_name
+
 
     def load_audio(self, audio_file: str | Path | np.ndarray,
                    start: Optional[float] = None,
@@ -216,12 +251,47 @@ class WhisperXTranscriber:
 
         return np.frombuffer(out, np.int16).flatten().astype(np.float32) / 32768.0
 
+    def get_audio_duration(self, audio_file: str | Path) -> float:
+        cmd = [
+            "ffprobe",
+            "-v", "error",
+            "-show_entries", "format=duration",
+            "-of", "default=noprint_wrappers=1:nokey=1",
+            str(audio_file)
+        ]
+        try:
+            out = subprocess.check_output(
+                cmd, stderr=subprocess.STDOUT).decode().strip()
+            if not out:
+                raise RuntimeError("ffprobe returned empty output.")
+            duration = float(out)
+            if duration <= 0:
+                raise RuntimeError(f"Invalid duration value: {duration}.")
+            return duration
+        except FileNotFoundError as e:
+            raise RuntimeError(
+                "ffprobe not found. Please install FFmpeg and ensure ffprobe is in PATH."
+            ) from e
+        except subprocess.CalledProcessError as e:
+            raise RuntimeError(
+                f"ffprobe failed for file '{audio_file}'.\n"
+                f"ffprobe output:\n{e.output.decode(errors='ignore')}"
+            ) from e
+        except ValueError as e:
+            raise RuntimeError(
+                f"ffprobe returned a non-numeric duration: '{out}'"
+            ) from e
+
     def transcribe(self, audio_file: str | Path | np.ndarray,
                    #    additional_args: Optional[dict] = None
+                   _print_progress: bool = True,
+                   _combined_progress: bool = True
                    ) -> TranscriptionResult:
         """
         you can also use this function by itself if you don't need alignment and diarization.
         To lower memory use, please use 'delete_model' method after using this method.
+
+        _print_progress and _combined_progress are for internal use when called from chunk_transcribe_generator.
         """
         audio = self.load_audio(audio_file)
         # if additional_args is None:
@@ -232,13 +302,55 @@ class WhisperXTranscriber:
             batch_size=self.batch_size,
             num_workers=self.num_workers,
             # language=self.language_code,
-            print_progress=self.print_progress,
-            combined_progress=self.combined_progress,
+            print_progress=self.print_progress and _print_progress,
+            combined_progress=self.combined_progress and _combined_progress,
             # **additional_args
         )
 
         # self.delete_object(self.asr_model)
         return result
+
+    def chunk_transcribe_generator(self, audio_file: str | Path):
+        """
+        Generator that:
+        - loads small audio windows
+        - runs WhisperX
+        - shifts timestamps
+        - yields segments in absolute time
+        - frees memory after each chunk
+        """
+        if self.chunk_audio_minutes is None:
+            raise ValueError("if chunk_audio_minutes is None, please use 'transcribe' method.")
+        
+        chunk_sec = self.chunk_audio_minutes * 60
+        total_duration = self.get_audio_duration(audio_file)
+        starts = np.arange(0, total_duration, chunk_sec)
+
+        detected_language = None
+
+        for idx, start in enumerate(starts):
+            end = min(start + chunk_sec, total_duration)
+            print(
+                f"[cyan]Transcribing chunk {idx}/{len(starts)} ({start:.1f}s → {end:.1f}s)[/]")
+
+            audio_chunk = self.load_audio(
+                audio_file, start=start, duration=chunk_sec)
+            chunk_result = self.transcribe(audio_chunk,
+                                           # 나중에 여기에 여러 청크를 처리할 때의 출력을 따로 지정 가능
+                                           )
+
+            if detected_language is None:
+                detected_language = chunk_result["language"]
+
+            for seg in chunk_result["segments"]:
+                seg["start"] += start
+                seg["end"] += start
+                yield seg, detected_language
+
+            # hard memory cleanup
+            del audio_chunk, chunk_result
+            gc.collect()
+            torch.cuda.empty_cache()
 
     def align(self,
               transcription_result: TranscriptionResult,
@@ -295,7 +407,7 @@ class WhisperXTranscriber:
 
         diarize_segments = diarize_model(
             audio,
-            num_speakers=self.num_speakers
+            num_speakers=self.num_speakers,
             min_speakers=self.min_speakers,
             max_speakers=self.max_speakers
         )
