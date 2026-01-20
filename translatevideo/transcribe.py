@@ -2,6 +2,7 @@
 part of the code is adapted from of whisperx
 TODO:
 - 오디오가 길 경우 메모리 관리를 위해 쪼개서 처리
+- 여러 오디오 파일을 지원 < 이건 x
 - 전사 결과를 파일로 기록하고 중단시 불러옴. 전부 완성되면 다음 처리 단계로
 - 자막 제작(init, main, SubtitleProcessor, utils, transcribe 파일 참조) 
 - 나중에 logging 모듈로 출력 변경
@@ -47,7 +48,6 @@ class WhisperXTranscriber:
                  min_speakers: Optional[int] = None,
                  max_speakers: Optional[int] = None,
                  num_speakers: Optional[int] = None,
-                 #  delete_used_models: bool = True
                  ) -> None:
         """
         Some part of this code is adapted from github of whisperx
@@ -81,9 +81,9 @@ class WhisperXTranscriber:
         self.vad_model = vad_model
         self.vad_method = vad_method
         self.language_code = language_code
-        if chunk_audio_minutes is not None and chunk_audio_minutes <= 0:
-            raise ValueError(
-                f"{self.__class__.__name__}.chunk_audio_minutes must be positive value or None.")
+        if isinstance(chunk_audio_minutes, float) and chunk_audio_minutes <= 0:
+            print(f"[Warning] {self.__class__.__name__}.chunk_audio_minutes must be positive value or None. It will be set to None.")
+            self.chunk_audio_minutes = None
         else:
             self.chunk_audio_minutes = chunk_audio_minutes
         self.batch_size = batch_size
@@ -141,10 +141,10 @@ class WhisperXTranscriber:
             )
         return self._diarize_model
 
-    def _delete_object(self, object_: Any) -> None:
-        # if self.delete_used_models:
-        if object_:
-            del object_
+    @staticmethod
+    def _delete_object(*objects: Any) -> None:
+        for obj in objects:
+            del obj
         gc.collect()
         torch.cuda.empty_cache()
 
@@ -164,28 +164,30 @@ class WhisperXTranscriber:
         Automatically chunks audio, transcribes, aligns, and diarizes (if specified) the given audio file.
         Because whisperx itself preprocesses audio file, any type of audio file can be given.
         """
-        # # 오디오 청킹 및 제너레이터 순회를 여기서 담당. 아래 함수들은 그대로 유지
-        # # 아래 전체에 for 문 씌움(오디오를 그냥 다 청킹해서 들고오면 메모리상으로 다를바가 없을거임 아마)
-        # if self.chunk_audio_minutes is None:
-        #     audio = self.load_audio(audio_file)
-        #     print("[green][Info][/] Starting transcription without chunking...")
-        #     result = self.transcribe(audio)
-        #     language_name = self.return_language_name(result)
-        #     print("[green][Info][/] Starting alignment...")
-        #     result = self.align(result, audio)
-        #     if use_diarization:
-        #         print("[green][Info][/] Starting diarization...")
-        #         result = self.diarize(audio, result)
-        #     return result, language_name
+        if self.chunk_audio_minutes is None:
+            audio = self.load_audio(audio_file)
+            print("[green][Info][/] Starting transcription without chunking...")
+            result = self.transcribe(audio)
+            language_name = self.return_language_name(result)
+            self.delete_model("asr_model")
+            print("[green][Info][/] Starting alignment...")
+            result = self.align(result, audio)
+            self.delete_model("align_model")
+            if use_diarization:
+                print("[green][Info][/] Starting diarization...")
+                result = self.diarize(audio, result)
+                self.delete_model("diarize_model")
+            return result, language_name
         # ---------------------------
     # 스트리밍 청크 전사
     # ---------------------------
         all_segments = []
         detected_language = None
 
-        for seg, lang in self._chunk_transcription_generator(audio_file):
+        for seg, lang in self.chunk_transcribe_generator(audio_file):
             all_segments.append(seg)
             detected_language = lang
+        self.delete_model("asr_model")
 
         merged_result = {
             "segments": all_segments,
@@ -306,8 +308,6 @@ class WhisperXTranscriber:
             combined_progress=self.combined_progress and _combined_progress,
             # **additional_args
         )
-
-        # self.delete_object(self.asr_model)
         return result
 
     def chunk_transcribe_generator(self, audio_file: str | Path):
@@ -317,7 +317,9 @@ class WhisperXTranscriber:
         - runs WhisperX
         - shifts timestamps
         - yields segments in absolute time
-        - frees memory after each chunk
+        - deletes segment after each chunk
+
+        *Note*: it doesn't delete ASR model. To lower memory use, please use 'delete_model' method after processing all chunks.
         """
         if self.chunk_audio_minutes is None:
             raise ValueError("if chunk_audio_minutes is None, please use 'transcribe' method.")
@@ -348,9 +350,7 @@ class WhisperXTranscriber:
                 yield seg, detected_language
 
             # hard memory cleanup
-            del audio_chunk, chunk_result
-            gc.collect()
-            torch.cuda.empty_cache()
+            self._delete_object(audio_chunk, chunk_result)
 
     def align(self,
               transcription_result: TranscriptionResult,
