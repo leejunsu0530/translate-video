@@ -1,3 +1,9 @@
+"""
+TODO:
+ytdlp의 인자들은 -h로 보여줄 수 있는데, 이건 argpase로 구현되고 init의 main 함수에 있음.
+마찬가지로 init에서 parse_options라는 함수가 있음. 아래의 해석 함수에서 참고.
+
+"""
 import yt_dlp  # type: ignore
 import yt_dlp.options  # type: ignore
 from typing import Literal

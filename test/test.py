@@ -1,6 +1,7 @@
 from translatevideo import WhisperXTranscriber
 from pprint import pprint
 from pathlib import Path
+import yt_dlp
 
 transcriber = WhisperXTranscriber(
     "tiny", device="cpu", num_workers=4,  compute_type="auto", language_code="en")

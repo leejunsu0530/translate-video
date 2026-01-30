@@ -1,14 +1,18 @@
 """
 part of the code is adapted from of whisperx
 TODO:
-- 오디오가 길 경우 메모리 관리를 위해 쪼개서 처리
+- 인자들을 묶어서 받는 방식 사용, asr이랑 transcribe 보고 수정. 지금 인자들 말고 추가로 원래 지원하는 인자들도 여기로 지원 
+- 모델 사용 후 삭제 코드에서, 삭제를 어느 시점에 해야 하는지 gpt 물어보기
+- 임시 gui 추가, 로깅 모듈로 출력 변경 및 연동
+- ytdlp 기반 영상 불러오기 클래스
+- 오디오가 길 경우 메모리 관리를 위해 쪼개서 처리 - 테스트 필요
 - 여러 오디오 파일을 지원 < 이건 x
-- 전사 결과를 파일로 기록하고 중단시 불러옴. 전부 완성되면 다음 처리 단계로
-- 자막 제작(init, main, SubtitleProcessor, utils, transcribe 파일 참조) 
-- 나중에 logging 모듈로 출력 변경
+- 전사 결과를 파일로 기록하고 중단시 불러옴. 전부 완성되면 다음 처리 단계로 - 나중에
+- 자막 제작(init, main, SubtitleProcessor, utils, transcribe 파일 참조) + subtitlesprocessor 사용 고려
 - 불러오기 함수에 모델 이름 지정 기능 등 있는데 그거 활용할 수 있게 하기
 - 나중에 다중상속 고려한 설계
 """
+
 import whisperx  # type: ignore
 import gc
 import torch
@@ -16,8 +20,9 @@ import platform
 import subprocess
 from whisperx.vads import Vad   # type: ignore
 from whisperx.schema import AlignedTranscriptionResult, TranscriptionResult  # type: ignore
-from whisperx.utils import LANGUAGES  # type: ignore
+from whisperx.utils import LANGUAGES, optional_int, str2bool  # type: ignore
 from typing import Literal, Optional, Any
+from dataclasses import dataclass
 from pathlib import Path
 import numpy as np
 from rich import print
@@ -28,6 +33,68 @@ from rich import print
 from translatevideo.utils.type_hints import LanguageNames
 from translatevideo.utils.type_hints import LanguageCodes
 from translatevideo.utils.type_hints import WhisperModels
+
+
+@dataclass
+class AsrOptions:
+    """
+    parser.add_argument("--beam_size", type=optional_int, default=5, help="number of beams in beam search, only applicable when temperature is zero")
+    parser.add_argument("--patience", type=float, default=1.0, help="optional patience value to use in beam decoding, as in https://arxiv.org/abs/2204.05424, the default (1.0) is equivalent to conventional beam search")
+    parser.add_argument("--length_penalty", type=float, default=1.0, help="optional token length penalty coefficient (alpha) as in https://arxiv.org/abs/1609.08144, uses simple length normalization by default")
+    parser.add_argument("--length_penalty", type=float, default=1.0, help="optional token length penalty coefficient (alpha) as in https://arxiv.org/abs/1609.08144, uses simple length normalization by default")
+    parser.add_argument("--temperature", type=float, default=0, help="temperature to use for sampling")
+
+    여기 인자에서, 이걸 전해줄 때 asr에 직접 주는게 아니라 함수 내 인자로 전해줌. 사용가능한 인자의 종류가 어떻게 되는지 확인 필요
+    여기서 init으로 값을 받는 것뿐만 아니라 연산도 행할 수 있는지, 전해줄 때는 어떻게 값을 주고 받아야 하는지
+    parser에 넣은 help값 등은 건들 수 있는지?
+
+    여기 인자는 main에서 호출한 transcribe.py에서 인자로 준걸 해석해서 아래의 asr options로 
+    전해주고 여기서 load model 함수의 asr options 인자에 넣음. 
+    그러면 load model에서 default asr options를 업데이트함.
+    이론상으로 나는 아래의, cli에서 전해주는 인자뿐만 아니라 asr.py의 모든 인자를 전부 여기 정의해놓아도 됨. 
+    내가 help를 적을 수 있는 건 cli의 인자만 되지만
+
+    asr_options = {
+        "beam_size": args.pop("beam_size"),
+        "patience": args.pop("patience"),
+        "length_penalty": args.pop("length_penalty"),
+        "temperatures": temperature,
+        "compression_ratio_threshold": args.pop("compression_ratio_threshold"),
+        "log_prob_threshold": args.pop("logprob_threshold"),
+        "no_speech_threshold": args.pop("no_speech_threshold"),
+        "condition_on_previous_text": False,
+        "initial_prompt": args.pop("initial_prompt"),
+        "hotwords": args.pop("hotwords"),
+        "suppress_tokens": [int(x) for x in args.pop("suppress_tokens").split(",")],
+        "suppress_numerals": args.pop("suppress_numerals"),
+    }
+    """
+    beam_size: optional_int = 5
+    patience: float = 1.0
+    length_penalty: float = 1.0
+    temperatures: list[float] = 0
+    compression_ratio_threshold
+    log_prob_threshold
+    no_speech_threshold
+    condition_on_previous_text
+    initial_prompt
+    hotwords
+    suppress_tokens
+    suppress_numerals
+
+
+@dataclass
+class VadArgs:
+    vad_model: Optional[Vad] = None
+    vad_method: Literal["pyannote", "silero"] = "silero"
+
+
+@dataclass
+class DiarizeArgs:
+    hf_token: Optional[str] = None
+    min_speakers: Optional[int] = None
+    max_speakers: Optional[int] = None
+    num_speakers: Optional[int] = None
 
 
 class WhisperXTranscriber:
@@ -82,7 +149,8 @@ class WhisperXTranscriber:
         self.vad_method = vad_method
         self.language_code = language_code
         if isinstance(chunk_audio_minutes, float) and chunk_audio_minutes <= 0:
-            print(f"[Warning] {self.__class__.__name__}.chunk_audio_minutes must be positive value or None. It will be set to None.")
+            print(
+                f"[Warning] {self.__class__.__name__}.chunk_audio_minutes must be positive value or None. It will be set to None.")
             self.chunk_audio_minutes = None
         else:
             self.chunk_audio_minutes = chunk_audio_minutes
@@ -212,7 +280,6 @@ class WhisperXTranscriber:
 
         return aligned, language_name
 
-
     def load_audio(self, audio_file: str | Path | np.ndarray,
                    start: Optional[float] = None,
                    duration: Optional[float] = None,
@@ -322,8 +389,9 @@ class WhisperXTranscriber:
         *Note*: it doesn't delete ASR model. To lower memory use, please use 'delete_model' method after processing all chunks.
         """
         if self.chunk_audio_minutes is None:
-            raise ValueError("if chunk_audio_minutes is None, please use 'transcribe' method.")
-        
+            raise ValueError(
+                "if chunk_audio_minutes is None, please use 'transcribe' method.")
+
         chunk_sec = self.chunk_audio_minutes * 60
         total_duration = self.get_audio_duration(audio_file)
         starts = np.arange(0, total_duration, chunk_sec)
