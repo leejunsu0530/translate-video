@@ -29,7 +29,8 @@ dependencies = [ # paddlepaddle, torch는 별도 설치
     "hf_xet",
     "accelerate",
     "silero-vad",
-    "pywhispercpp"
+    "pywhispercpp",
+    "pywebview",
     # "opencv-python",
     # "paddleocr",
     
@@ -39,10 +40,15 @@ dependencies = [ # paddlepaddle, torch는 별도 설치
 # pwcpp = ["pywhisercpp"]
 dev = ["pip-licenses"]
 test = ["datasets"] #일단 데모를 gradio로, 실제 구현은 pyside로
+deno = ["yt-dlp[deno]"]
+gui = [
+    "Pyside6",
+    "gradio"
+]
 intel = [ # 최신 버전을 위해 github에서 가져옴
     "openvino", 
     "optimum-intel[openvino] @ git+https://github.com/huggingface/optimum-intel.git"
-    ]
+]
 
 [project.scripts]
 vidsubx = "videosubx:main" # 모듈경로:함수이름 구조
